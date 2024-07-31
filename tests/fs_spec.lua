@@ -1,0 +1,20 @@
+local fs = require("quicker.fs")
+
+local home = os.getenv("HOME")
+local cwd = vim.fn.getcwd()
+
+describe("fs", function()
+  it("shortens path", function()
+    assert.equals("~/bar/baz.txt", fs.shorten_path(home .. "/bar/baz.txt"))
+    assert.equals("bar/baz.txt", fs.shorten_path(cwd .. "/bar/baz.txt"))
+    assert.equals("/foo/bar.txt", fs.shorten_path("/foo/bar.txt"))
+  end)
+
+  it("finds subpath", function()
+    assert.truthy(fs.is_subpath("/root", "/root/foo"))
+    assert.truthy(fs.is_subpath(cwd, "foo"))
+    assert.falsy(fs.is_subpath("/root", "/foo"))
+    assert.falsy(fs.is_subpath("/root", "/rooter/foo"))
+    assert.falsy(fs.is_subpath("/root", "/root/../foo"))
+  end)
+end)

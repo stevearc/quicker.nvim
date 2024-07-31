@@ -1,0 +1,157 @@
+*quicker.txt*
+*Quicker* *quicker* *quicker.nvim*
+--------------------------------------------------------------------------------
+CONTENTS                                                        *quicker-contents*
+
+  1. Options                                                 |quicker-options|
+  2. Api                                                         |quicker-api|
+
+--------------------------------------------------------------------------------
+OPTIONS                                                          *quicker-options*
+
+>lua
+    require("quicker").setup({
+      -- Local options to set for quickfix
+      opts = {
+        buflisted = false,
+        number = false,
+        relativenumber = false,
+        signcolumn = "auto",
+        winfixheight = true,
+        wrap = false,
+      },
+      -- Set to false to disable the default options in `opts`
+      use_default_opts = true,
+      -- Keymaps to set for the quickfix buffer
+      keys = {
+        -- { ">", "<cmd>lua require('quicker').expand()<CR>", desc = "Expand quickfix content" },
+      },
+      -- Callback function to run any custom logic or keymaps for the quickfix buffer
+      on_qf = function(bufnr) end,
+      edit = {
+        -- Enable editing the quickfix like a normal buffer
+        enabled = true,
+        -- Set to true to write buffers after applying edits.
+        -- Set to "unmodified" to only write unmodified buffers.
+        autosave = "unmodified",
+      },
+      -- Keep the cursor to the right of the filename and lnum columns
+      constrain_cursor = true,
+      highlight = {
+        -- Use treesitter highlighting
+        treesitter = true,
+        -- Use LSP semantic token highlighting
+        lsp = true,
+        -- Load the referenced buffers to apply more accurate highlights (may be slow)
+        load_buffers = true,
+      },
+      -- Map of quickfix item type to icon
+      type_icons = {
+        E = "󰅚 ",
+        W = "󰀪 ",
+        I = " ",
+        N = " ",
+        H = " ",
+      },
+      -- Border characters
+      borders = {
+        vert = "┃",
+        -- Strong headers separate results from different files
+        strong_header = "━",
+        strong_cross = "╋",
+        strong_end = "┫",
+        -- Soft headers separate results within the same file
+        soft_header = "╌",
+        soft_cross = "╂",
+        soft_end = "┨",
+      },
+      -- Trim the leading whitespace from results
+      trim_leading_whitespace = true,
+      -- Maximum width of the filename column
+      max_filename_width = function()
+        return math.floor(math.min(95, vim.o.columns / 2))
+      end,
+      -- How far the header should extend to the right
+      header_length = function(type, start_col)
+        return vim.o.columns - start_col
+      end,
+    })
+<
+
+--------------------------------------------------------------------------------
+API                                                                  *quicker-api*
+
+expand({opts})                                                    *quicker.expand*
+    Expand the context around the quickfix results.
+
+    Parameters:
+      {opts} `nil|quicker.ExpandOpts`
+          {before}          `nil|integer` Number of lines of context to show
+                            before the line (default 2)
+          {after}           `nil|integer` Number of lines of context to show
+                            after the line (default 2)
+          {add_to_existing} `nil|boolean`
+          {loclist_win}     `nil|integer`
+
+    Note:
+      If there are multiple quickfix items for the same line of a file, only the first
+      one will remain after calling expand().
+
+collapse()                                                      *quicker.collapse*
+    Collapse the context around quickfix results, leaving only the `valid`
+    items.
+
+
+refresh({loclist_win})                                           *quicker.refresh*
+    Update the quickfix list with the current buffer text for each item.
+
+    Parameters:
+      {loclist_win} `nil|integer`
+
+is_open({loclist_win})                                           *quicker.is_open*
+
+    Parameters:
+      {loclist_win} `nil|integer` Check if loclist is open for the given window.
+                    If nil, check quickfix.
+
+toggle({opts})                                                    *quicker.toggle*
+    Toggle the quickfix or loclist window.
+
+    Parameters:
+      {opts} `nil|quicker.OpenOpts`
+          {loclist}    `nil|boolean` Toggle the loclist instead of the quickfix
+                       list
+          {focus}      `nil|boolean` Focus the quickfix window after toggling
+                       (default false)
+          {height}     `nil|integer` Height of the quickfix window when opened.
+                       Defaults to number of items in the list.
+          {min_height} `nil|integer` Minimum height of the quickfix window.
+                       Default 4.
+          {max_height} `nil|integer` Maximum height of the quickfix window.
+                       Default 10.
+
+open({opts})                                                        *quicker.open*
+    Open the quickfix or loclist window.
+
+    Parameters:
+      {opts} `nil|quicker.OpenOpts`
+          {loclist}    `nil|boolean` Toggle the loclist instead of the quickfix
+                       list
+          {focus}      `nil|boolean` Focus the quickfix window after toggling
+                       (default false)
+          {height}     `nil|integer` Height of the quickfix window when opened.
+                       Defaults to number of items in the list.
+          {min_height} `nil|integer` Minimum height of the quickfix window.
+                       Default 4.
+          {max_height} `nil|integer` Maximum height of the quickfix window.
+                       Default 10.
+
+close({opts})                                                      *quicker.close*
+    Close the quickfix or loclist window.
+
+    Parameters:
+      {opts} `nil|quicker.CloseOpts`
+          {loclist} `nil|boolean` Close the loclist instead of the quickfix list
+
+================================================================================
+vim:tw=80:ts=2:ft=help:norl:syntax=help:

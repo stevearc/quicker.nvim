@@ -1,0 +1,15 @@
+                              ┃ 1┃line 1
+tests/tmp/edit_multiple_1.txt ┃ 2┃new text
+                              ┃ 3┃some text
+                              ┃ 4┃line 4
+╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╂╌╌╂╌╌╌╌╌╌╌╌
+                              ┃ 7┃line 7
+                              ┃ 8┃line 8
+tests/tmp/edit_multiple_1.txt ┃ 9┃other text
+                              ┃10┃line 10
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╋━━╋━━━━━━━━
+                              ┃ 3┃line 3
+                              ┃ 4┃line 4
+tests/tmp/edit_multiple_2.txt ┃ 5┃final text
+                              ┃ 6┃line 6
+                              ┃ 7┃line 7
