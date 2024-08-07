@@ -247,8 +247,14 @@ add_qf_highlights = function(info)
   local start = vim.uv.hrtime() / 1e6
   for i = info.start_idx, info.end_idx do
     vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, ns, i - 1, i)
-    ---@type QuickFixItem
+    ---@type nil|QuickFixItem
     local item = qf_list.items[i]
+    -- If the quickfix list has changed length since the async highlight job has started,
+    -- we should abort and let the next async highlight task pick it up.
+    if not item then
+      return
+    end
+
     local line = lines[i]
     if item.bufnr ~= 0 and line then
       local loaded = vim.api.nvim_buf_is_loaded(item.bufnr)
