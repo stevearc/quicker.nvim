@@ -180,6 +180,9 @@ local function add_item_highlights_from_buf(qfbufnr, item, line, lnum)
   local ns = vim.api.nvim_create_namespace("quicker_highlights")
   -- TODO re-apply highlights when a buffer is loaded or a LSP receives semantic tokens
   local src_line = vim.api.nvim_buf_get_lines(item.bufnr, item.lnum - 1, item.lnum, false)[1]
+  if not src_line then
+    return
+  end
 
   -- If the lines differ only in leading whitespace, we should add highlights anyway and adjust
   -- the offset.
