@@ -192,7 +192,7 @@ local function add_item_highlights_from_buf(qfbufnr, item, line, lnum)
   -- Only add highlights if the text in the quickfix matches the source line
   if item.text:sub(item_space + 1) == src_line:sub(src_space + 1) then
     local offset = line:find(b.vert, 1, true)
-    offset = line:find(b.vert, offset + b.vert:len(), true) + b.vert:len() - 1
+    offset = line:find(b.vert, (offset or 0) + b.vert:len(), true) + b.vert:len() - 1
     offset = offset - (prefixes[item.bufnr] or ""):len()
     offset = offset - src_space + item_space
 
