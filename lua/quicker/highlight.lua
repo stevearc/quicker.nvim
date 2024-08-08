@@ -178,8 +178,8 @@ M.get_heuristic_ts_highlights = function(item, line)
     return {}
   end
 
-  local parser = vim.treesitter.get_string_parser(text, lang)
-  if not parser then
+  local has_parser, parser = pcall(vim.treesitter.get_string_parser, text, lang)
+  if not has_parser then
     return {}
   end
 
