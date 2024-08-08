@@ -49,20 +49,16 @@ local sign_highlight_map = {
 
 ---@param item QuickFixItem
 local function get_filename_from_item(item)
-  if item.valid == 1 then
-    if item.module and item.module ~= "" then
-      return item.module
-    elseif item.bufnr > 0 then
-      local bufname = vim.api.nvim_buf_get_name(item.bufnr)
-      local path = fs.shorten_path(bufname)
-      local max_len = config.max_filename_width()
-      if path:len() > max_len then
-        path = "…" .. path:sub(path:len() - max_len - 1)
-      end
-      return path
-    else
-      return ""
+  if item.valid == 1 and item.module and item.module ~= "" then
+    return item.module
+  elseif item.bufnr > 0 then
+    local bufname = vim.api.nvim_buf_get_name(item.bufnr)
+    local path = fs.shorten_path(bufname)
+    local max_len = config.max_filename_width()
+    if path:len() > max_len then
+      path = "…" .. path:sub(path:len() - max_len - 1)
     end
+    return path
   else
     return ""
   end
@@ -409,12 +405,9 @@ function M.quickfixtextfunc(info)
       table.insert(ret, table.concat(pieces, ""))
     else
       -- Non-matching line, either from context or normal QF results parsed with errorformat
-      local lnum = user_data.lnum or " "
-      local pieces = {
-        string.rep(" ", col_width),
-        lnum_fmt:format(lnum),
-        remove_prefix(item.text, prefixes[item.bufnr]),
-      }
+      local pieces = { rpad(get_filename_from_item(item), col_width) }
+      table.insert(pieces, string.rep(" ", lnum_width))
+      table.insert(pieces, remove_prefix(item.text, prefixes[item.bufnr]))
       table.insert(ret, table.concat(pieces, b.vert))
     end
   end
