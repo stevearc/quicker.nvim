@@ -47,6 +47,21 @@ local function setup(opts)
   end
 
   vim.o.quickfixtextfunc = "v:lua.require'quicker.display'.quickfixtextfunc"
+
+  -- If the quickfix/loclist is already open, refresh it so the quickfixtextfunc will take effect.
+  -- This is required for lazy-loading to work properly.
+  local list = vim.fn.getqflist({ all = 0 })
+  if not vim.tbl_isempty(list.items) then
+    vim.fn.setqflist({}, "r", list)
+  end
+  for _, winid in ipairs(vim.api.nvim_list_wins()) do
+    if vim.api.nvim_win_is_valid(winid) then
+      local llist = vim.fn.getloclist(winid, { all = 0 })
+      if not vim.tbl_isempty(list.items) then
+        vim.fn.setloclist(winid, {}, "r", llist)
+      end
+    end
+  end
 end
 
 M.setup = setup

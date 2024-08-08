@@ -50,6 +50,7 @@ quicker.nvim supports all the usual plugin managers
 ```lua
 {
   'stevearc/quicker.nvim',
+  event = "FileType qf",
   ---@module "quicker"
   ---@type quicker.SetupOptions
   opts = {},
