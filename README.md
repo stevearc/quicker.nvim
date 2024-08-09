@@ -50,6 +50,7 @@ quicker.nvim supports all the usual plugin managers
 ```lua
 {
   'stevearc/quicker.nvim',
+  event = "FileType qf",
   ---@module "quicker"
   ---@type quicker.SetupOptions
   opts = {},
@@ -250,6 +251,7 @@ for just the quickfix window.
 - `Delimiter` - Used for the divider between filename, line number, and text
 - `QuickFixLineNr` - Used for the line number
 - `QuickFixFilename` - Used for the filename
+- `QuickFixFilenameInvalid` - Used for the filename when `valid = 0`
 - `DiagnosticSign*` - Used for the signs that display the quickfix error type
 
 ## API
