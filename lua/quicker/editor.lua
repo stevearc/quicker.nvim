@@ -42,6 +42,10 @@ local function filename_match(item, filename)
     if vim.startswith(filename, "~") then
       filename = filename:sub(2)
     end
+    -- Trim off the leading "…" if this was a truncated path
+    if vim.startswith(filename, "…") then
+      filename = filename:sub(1 + string.len("…"))
+    end
     return vim.endswith(bufname, filename)
   end
 end
