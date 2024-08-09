@@ -232,24 +232,25 @@ add_qf_highlights = function(info)
   else
     qf_list = vim.fn.getloclist(info.winid, { id = info.id, items = 0, qfbufnr = 0 })
   end
-  if not qf_list.qfbufnr or qf_list.qfbufnr == 0 then
+  local qfbufnr = qf_list.qfbufnr
+  if not qfbufnr or qfbufnr == 0 then
     return
   elseif info.end_idx < info.start_idx then
     return
   end
 
-  local lines = vim.api.nvim_buf_get_lines(qf_list.qfbufnr, 0, -1, false)
+  local lines = vim.api.nvim_buf_get_lines(qfbufnr, 0, -1, false)
   local ns = vim.api.nvim_create_namespace("quicker_highlights")
 
   -- Only clear the error namespace during the first pass of "fast" highlighting
   if not info.force_bufload then
     local err_ns = vim.api.nvim_create_namespace("quicker_err")
-    vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, err_ns, 0, -1)
+    vim.api.nvim_buf_clear_namespace(qfbufnr, err_ns, 0, -1)
   end
 
   local start = vim.uv.hrtime() / 1e6
   for i = info.start_idx, info.end_idx do
-    vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, ns, i - 1, i)
+    vim.api.nvim_buf_clear_namespace(qfbufnr, ns, i - 1, i)
     ---@type nil|QuickFixItem
     local item = qf_list.items[i]
     -- If the quickfix list has changed length since the async highlight job has started,
@@ -259,7 +260,10 @@ add_qf_highlights = function(info)
     end
 
     local line = lines[i]
-    if item.bufnr ~= 0 and line then
+    if not line then
+      break
+    end
+    if item.bufnr ~= 0 then
       local loaded = vim.api.nvim_buf_is_loaded(item.bufnr)
       if not loaded and info.force_bufload then
         vim.fn.bufload(item.bufnr)
@@ -267,11 +271,11 @@ add_qf_highlights = function(info)
       end
 
       if loaded then
-        add_item_highlights_from_buf(qf_list.qfbufnr, item, line, i)
+        add_item_highlights_from_buf(qfbufnr, item, line, i)
       elseif config.highlight.treesitter then
         for _, hl in ipairs(highlight.get_heuristic_ts_highlights(item, line)) do
           local start_col, end_col, hl_group = hl[1], hl[2], hl[3]
-          vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, ns, i - 1, start_col, {
+          vim.api.nvim_buf_set_extmark(qfbufnr, ns, i - 1, start_col, {
             hl_group = hl_group,
             end_col = end_col,
             priority = 100,
@@ -283,7 +287,7 @@ add_qf_highlights = function(info)
 
     -- Set sign if item has a type
     if item.type and item.type ~= "" then
-      vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, ns, i - 1, 0, {
+      vim.api.nvim_buf_set_extmark(qfbufnr, ns, i - 1, 0, {
         sign_text = get_icon(item.type),
         sign_hl_group = sign_highlight_map[item.type:upper()],
         invalidate = true,
@@ -292,9 +296,11 @@ add_qf_highlights = function(info)
 
     local user_data = get_user_data(item)
     if user_data.header == "hard" then
-      vim.api.nvim_buf_add_highlight(qf_list.qfbufnr, ns, "QuickFixHeaderHard", i - 1, 0, -1)
+      -- We can't highlight to end of line (-1) because if we do, then clearing the extmarks for the
+      -- _next_ line (which we do on the next iteration) will also clear this!
+      vim.api.nvim_buf_add_highlight(qfbufnr, ns, "QuickFixHeaderHard", i - 1, 0, line:len())
     elseif user_data.header == "soft" then
-      vim.api.nvim_buf_add_highlight(qf_list.qfbufnr, ns, "QuickFixHeaderSoft", i - 1, 0, -1)
+      vim.api.nvim_buf_add_highlight(qfbufnr, ns, "QuickFixHeaderSoft", i - 1, 0, line:len())
     end
 
     -- If we've been processing for too long, defer to preserve editor responsiveness
