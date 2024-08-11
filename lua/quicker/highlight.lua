@@ -218,6 +218,9 @@ function M.set_highlight_groups()
   if vim.tbl_isempty(vim.api.nvim_get_hl(0, { name = "QuickFixFilename" })) then
     vim.api.nvim_set_hl(0, "QuickFixFilename", { link = "Directory", default = true })
   end
+  if vim.tbl_isempty(vim.api.nvim_get_hl(0, { name = "QuickFixFilenameInvalid" })) then
+    vim.api.nvim_set_hl(0, "QuickFixFilenameInvalid", { link = "Comment", default = true })
+  end
   if vim.tbl_isempty(vim.api.nvim_get_hl(0, { name = "QuickFixLineNr" })) then
     vim.api.nvim_set_hl(0, "QuickFixLineNr", { link = "LineNr", default = true })
   end

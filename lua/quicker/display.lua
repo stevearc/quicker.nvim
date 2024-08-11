@@ -49,20 +49,16 @@ local sign_highlight_map = {
 
 ---@param item QuickFixItem
 local function get_filename_from_item(item)
-  if item.valid == 1 then
-    if item.module and item.module ~= "" then
-      return item.module
-    elseif item.bufnr > 0 then
-      local bufname = vim.api.nvim_buf_get_name(item.bufnr)
-      local path = fs.shorten_path(bufname)
-      local max_len = config.max_filename_width()
-      if path:len() > max_len then
-        path = "…" .. path:sub(path:len() - max_len - 1)
-      end
-      return path
-    else
-      return ""
+  if item.module and item.module ~= "" then
+    return item.module
+  elseif item.bufnr > 0 then
+    local bufname = vim.api.nvim_buf_get_name(item.bufnr)
+    local path = fs.shorten_path(bufname)
+    local max_len = config.max_filename_width()
+    if path:len() > max_len then
+      path = "…" .. path:sub(path:len() - max_len - 1)
     end
+    return path
   else
     return ""
   end
@@ -301,6 +297,9 @@ add_qf_highlights = function(info)
       vim.api.nvim_buf_add_highlight(qfbufnr, ns, "QuickFixHeaderHard", i - 1, 0, line:len())
     elseif user_data.header == "soft" then
       vim.api.nvim_buf_add_highlight(qfbufnr, ns, "QuickFixHeaderSoft", i - 1, 0, line:len())
+    elseif item.valid == 0 then
+      local offset = line:find(config.borders.vert, 1, true) or 1
+      vim.api.nvim_buf_add_highlight(qfbufnr, ns, "QuickFixFilenameInvalid", i - 1, 0, offset - 1)
     end
 
     -- If we've been processing for too long, defer to preserve editor responsiveness
@@ -362,9 +361,9 @@ function M.quickfixtextfunc(info)
   local qf_list
   local ret = {}
   if info.quickfix == 1 then
-    qf_list = vim.fn.getqflist({ id = info.id, items = 0, qfbufnr = 0 })
+    qf_list = vim.fn.getqflist({ id = info.id, items = 0, qfbufnr = 0, context = 0 })
   else
-    qf_list = vim.fn.getloclist(info.winid, { id = info.id, items = 0, qfbufnr = 0 })
+    qf_list = vim.fn.getloclist(info.winid, { id = info.id, items = 0, qfbufnr = 0, context = 0 })
   end
   ---@type QuickFixItem[]
   local items = qf_list.items
@@ -378,13 +377,12 @@ function M.quickfixtextfunc(info)
     local user_data = get_user_data(item)
     if item.valid == 1 then
       -- Matching line
-      local pieces = { rpad(get_filename_from_item(item), col_width) }
-      if item.lnum ~= 0 then
-        table.insert(pieces, lnum_fmt:format(item.lnum))
-      else
-        table.insert(pieces, string.rep(" ", lnum_width))
-      end
-      table.insert(pieces, remove_prefix(item.text, prefixes[item.bufnr]))
+      local lnum = item.lnum == 0 and " " or item.lnum
+      local pieces = {
+        rpad(get_filename_from_item(item), col_width),
+        lnum_fmt:format(lnum),
+        remove_prefix(item.text, prefixes[item.bufnr]),
+      }
       table.insert(ret, table.concat(pieces, b.vert))
     elseif user_data.header == "hard" then
       -- Header when expanded QF list
@@ -416,11 +414,19 @@ function M.quickfixtextfunc(info)
         table.insert(pieces, b.soft_end)
       end
       table.insert(ret, table.concat(pieces, ""))
-    else
-      -- Non-matching line, either from context or normal QF results parsed with errorformat
-      local lnum = user_data.lnum or " "
+    elseif user_data.lnum then
+      -- Non-matching line from quicker.nvim context lines
       local pieces = {
         string.rep(" ", col_width),
+        lnum_fmt:format(user_data.lnum),
+        remove_prefix(item.text, prefixes[item.bufnr]),
+      }
+      table.insert(ret, table.concat(pieces, b.vert))
+    else
+      -- Other non-matching line
+      local lnum = item.lnum == 0 and " " or item.lnum
+      local pieces = {
+        rpad(get_filename_from_item(item), col_width),
         lnum_fmt:format(lnum),
         remove_prefix(item.text, prefixes[item.bufnr]),
       }

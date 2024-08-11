@@ -38,6 +38,12 @@ a.describe("display", function()
         text = "text",
         valid = 0,
       },
+      {
+        bufnr = vim.fn.bufadd("README.md"),
+        lnum = 1,
+        text = "",
+        valid = 0,
+      },
     })
     vim.cmd.copen()
     test_util.assert_snapshot(0, "display_1")
