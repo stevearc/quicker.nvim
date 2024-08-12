@@ -274,6 +274,9 @@ local function save_changes(bufnr, loclist_win)
 
       local item = qf_list.items[found_idx]
       if item.bufnr ~= 0 and item.lnum ~= 0 then
+        if not vim.api.nvim_buf_is_loaded(item.bufnr) then
+          vim.fn.bufload(item.bufnr)
+        end
         -- add the whitespace prefix back to the parsed line text
         parsed.text = (prefixes[item.bufnr] or "") .. parsed.text
 
