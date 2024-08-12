@@ -220,6 +220,27 @@ local function add_item_highlights_from_buf(qfbufnr, item, line, lnum)
   end
 end
 
+---@param qfbufnr integer
+---@param info QuickFixTextFuncInfo
+local function highlight_buffer_when_entered(qfbufnr, info)
+  if vim.b[qfbufnr].pending_highlight then
+    return
+  end
+  vim.api.nvim_create_autocmd("BufEnter", {
+    desc = "Highlight quickfix buffer when entered",
+    buffer = qfbufnr,
+    nested = true,
+    once = true,
+    callback = function()
+      vim.b[qfbufnr].pending_highlight = nil
+      info.start_idx = 1
+      info.end_idx = vim.api.nvim_buf_line_count(qfbufnr)
+      schedule_highlights(info)
+    end,
+  })
+  vim.b[qfbufnr].pending_highlight = true
+end
+
 ---@param info QuickFixTextFuncInfo
 add_qf_highlights = function(info)
   local qf_list
@@ -236,6 +257,14 @@ add_qf_highlights = function(info)
   end
 
   local lines = vim.api.nvim_buf_get_lines(qfbufnr, 0, -1, false)
+  if #lines == 1 and lines[1] == "" then
+    -- If the quickfix buffer is not visible, it is possible that quickfixtextfunc has run but the
+    -- buffer has not been populated yet. If that is the case, we should exit early and ensure that
+    -- the highlighting task runs again when the buffer is opened in a window.
+    -- see https://github.com/stevearc/quicker.nvim/pull/8
+    highlight_buffer_when_entered(qfbufnr, info)
+    return
+  end
   local ns = vim.api.nvim_create_namespace("quicker_highlights")
 
   -- Only clear the error namespace during the first pass of "fast" highlighting
