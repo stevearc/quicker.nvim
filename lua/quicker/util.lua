@@ -26,4 +26,14 @@ M.get_win_type = function(winid)
   end
 end
 
+---@param item QuickFixItem
+---@return QuickFixUserData
+M.get_user_data = function(item)
+  if type(item.user_data) == "table" then
+    return item.user_data
+  else
+    return {}
+  end
+end
+
 return M

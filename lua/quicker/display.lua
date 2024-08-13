@@ -1,12 +1,14 @@
 local config = require("quicker.config")
 local fs = require("quicker.fs")
 local highlight = require("quicker.highlight")
+local util = require("quicker.util")
 
 local M = {}
 
 ---@class (exact) QuickFixUserData
----@field header? "hard"|"soft"
----@field lnum? integer
+---@field header? "hard"|"soft" When present, this line is a header
+---@field lnum? integer Encode the lnum separately for valid=0 items
+---@field error_text? string Error text to be added as virtual text on the line
 
 ---@class (exact) QuickFixItem
 ---@field text string
@@ -23,16 +25,6 @@ local M = {}
 ---@field valid 0|1
 ---@field user_data? any
 
----@param item QuickFixItem
----@return QuickFixUserData
-local function get_user_data(item)
-  if type(item.user_data) == "table" then
-    return item.user_data
-  else
-    return {}
-  end
-end
-
 ---@param type string
 ---@return string
 local function get_icon(type)
@@ -45,6 +37,13 @@ local sign_highlight_map = {
   I = "DiagnosticSignInfo",
   H = "DiagnosticSignHint",
   N = "DiagnosticSignHint",
+}
+local virt_text_highlight_map = {
+  E = "DiagnosticVirtualTextError",
+  W = "DiagnosticVirtualTextWarn",
+  I = "DiagnosticVirtualTextInfo",
+  H = "DiagnosticVirtualTextHint",
+  N = "DiagnosticVirtualTextHint",
 }
 
 ---@param item QuickFixItem
@@ -310,16 +309,22 @@ add_qf_highlights = function(info)
       end
     end
 
+    local user_data = util.get_user_data(item)
     -- Set sign if item has a type
     if item.type and item.type ~= "" then
-      vim.api.nvim_buf_set_extmark(qfbufnr, ns, i - 1, 0, {
+      local mark = {
         sign_text = get_icon(item.type),
         sign_hl_group = sign_highlight_map[item.type:upper()],
         invalidate = true,
-      })
+      }
+      if user_data.error_text then
+        mark.virt_text = {
+          { user_data.error_text, virt_text_highlight_map[item.type:upper()] or "Normal" },
+        }
+      end
+      vim.api.nvim_buf_set_extmark(qfbufnr, ns, i - 1, 0, mark)
     end
 
-    local user_data = get_user_data(item)
     if user_data.header == "hard" then
       -- We can't highlight to end of line (-1) because if we do, then clearing the extmarks for the
       -- _next_ line (which we do on the next iteration) will also clear this!
@@ -403,7 +408,7 @@ function M.quickfixtextfunc(info)
 
   for i = info.start_idx, info.end_idx do
     local item = items[i]
-    local user_data = get_user_data(item)
+    local user_data = util.get_user_data(item)
     if item.valid == 1 then
       -- Matching line
       local lnum = item.lnum == 0 and " " or item.lnum

@@ -64,16 +64,6 @@ local function plural(n, base, pluralized)
   end
 end
 
----@param item QuickFixItem
----@return QuickFixUserData
-local function get_user_data(item)
-  if type(item.user_data) == "table" then
-    return item.user_data
-  else
-    return {}
-  end
-end
-
 ---@param bufnr integer
 ---@param lnum integer
 ---@param text string
@@ -133,7 +123,7 @@ local function find_next(items, start, needle, prefixes)
     if not vim.tbl_isempty(header_types) then
       for i = start, #items do
         local item = items[i]
-        local user_data = get_user_data(item)
+        local user_data = util.get_user_data(item)
         if vim.tbl_contains(header_types, user_data.header) then
           return i
         end
@@ -169,7 +159,7 @@ local function find_next(items, start, needle, prefixes)
     local item = items[i]
     local lnum = item.lnum
     if not lnum or lnum == 0 then
-      lnum = get_user_data(item).lnum
+      lnum = util.get_user_data(item).lnum
     end
     if filename_match(item, needle.filename) and lnum == needle.lnum then
       return i

@@ -120,6 +120,14 @@ function M.expand(opts)
       local lines = vim.api.nvim_buf_get_lines(item.bufnr, low, high, false)
       for j, line in ipairs(lines) do
         if j + low == item.lnum then
+          -- If this is an "error" item, replace the text with the source line and store that text
+          -- in the user data so we can add it as virtual text later
+          if item.type ~= "" and not vim.endswith(line, item.text) then
+            local user_data = util.get_user_data(item)
+            user_data.error_text = item.text
+            item.user_data = user_data
+            item.text = line
+          end
           table.insert(items, item)
           if i == curpos then
             newpos = #items
