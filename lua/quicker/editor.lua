@@ -50,6 +50,20 @@ local function filename_match(item, filename)
   end
 end
 
+---@param n integer
+---@param base string
+---@param pluralized? string
+---@return string
+local function plural(n, base, pluralized)
+  if n == 1 then
+    return base
+  elseif pluralized then
+    return pluralized
+  else
+    return base .. "s"
+  end
+end
+
 ---@param item QuickFixItem
 ---@return QuickFixUserData
 local function get_user_data(item)
@@ -327,7 +341,9 @@ local function save_changes(bufnr, loclist_win)
   end
   local autosave = config.edit.autosave
   local num_applied = 0
+  local modified_bufs = {}
   for chg_buf, text_edits in pairs(changes) do
+    modified_bufs[chg_buf] = true
     num_applied = num_applied + #text_edits
     vim.lsp.util.apply_text_edits(text_edits, chg_buf, "utf-8")
     local was_modified = buf_was_modified[chg_buf]
@@ -340,16 +356,30 @@ local function save_changes(bufnr, loclist_win)
     end
   end
   if num_applied > 0 then
+    local num_files = vim.tbl_count(modified_bufs)
     local num_errors = vim.tbl_count(errors)
     if num_errors > 0 then
       local total = num_errors + num_applied
       vim.notify(
-        string.format("Applied %d/%d change%s", num_applied, total, total == 1 and "" or "s"),
+        string.format(
+          "Applied %d/%d %s in %d %s",
+          num_applied,
+          total,
+          plural(total, "change"),
+          num_files,
+          plural(num_files, "file")
+        ),
         vim.log.levels.WARN
       )
     else
       vim.notify(
-        string.format("Applied %d change%s", num_applied, num_applied == 1 and "" or "s"),
+        string.format(
+          "Applied %d %s in %d %s",
+          num_applied,
+          plural(num_applied, "change"),
+          num_files,
+          plural(num_files, "file")
+        ),
         vim.log.levels.INFO
       )
     end
