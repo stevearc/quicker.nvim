@@ -124,8 +124,10 @@ function M.expand(opts)
           -- in the user data so we can add it as virtual text later
           if item.type ~= "" and not vim.endswith(line, item.text) then
             local user_data = util.get_user_data(item)
-            user_data.error_text = item.text
-            item.user_data = user_data
+            if not user_data.error_text then
+              user_data.error_text = item.text
+              item.user_data = user_data
+            end
             item.text = line
           end
           table.insert(items, item)
