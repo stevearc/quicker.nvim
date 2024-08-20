@@ -283,14 +283,16 @@ one will remain after calling expand().
 Collapse the context around quickfix results, leaving only the `valid` items.
 
 
-### refresh(loclist_win)
+### refresh(loclist_win, opts)
 
-`refresh(loclist_win)` \
+`refresh(loclist_win, opts)` \
 Update the quickfix list with the current buffer text for each item.
 
-| Param       | Type           | Desc |
-| ----------- | -------------- | ---- |
-| loclist_win | `nil\|integer` |      |
+| Param       | Type                       | Desc           |                                                                                                                      |
+| ----------- | -------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- |
+| loclist_win | `nil\|integer`             |                |                                                                                                                      |
+| opts        | `nil\|quicker.RefreshOpts` |                |                                                                                                                      |
+|             | keep_diagnostics           | `nil\|boolean` | If a line has a diagnostic type, keep the original text and display it as virtual text after refreshing from source. |
 
 ### is_open(loclist_win)
 

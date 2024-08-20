@@ -82,8 +82,9 @@ end
 
 ---Update the quickfix list with the current buffer text for each item.
 ---@param loclist_win? integer
-M.refresh = function(loclist_win)
-  return require("quicker.context").refresh(loclist_win)
+---@param opts? quicker.RefreshOpts
+M.refresh = function(loclist_win, opts)
+  return require("quicker.context").refresh(loclist_win, opts)
 end
 
 ---@param loclist_win? integer Check if loclist is open for the given window. If nil, check quickfix.

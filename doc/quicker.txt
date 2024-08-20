@@ -102,11 +102,15 @@ collapse()                                                      *quicker.collaps
     items.
 
 
-refresh({loclist_win})                                           *quicker.refresh*
+refresh({loclist_win}, {opts})                                   *quicker.refresh*
     Update the quickfix list with the current buffer text for each item.
 
     Parameters:
       {loclist_win} `nil|integer`
+      {opts}        `nil|quicker.RefreshOpts`
+          {keep_diagnostics} `nil|boolean` If a line has a diagnostic type, keep
+                             the original text and display it as virtual text
+                             after refreshing from source.
 
 is_open({loclist_win})                                           *quicker.is_open*
 

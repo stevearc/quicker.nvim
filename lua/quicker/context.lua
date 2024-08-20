@@ -12,6 +12,21 @@ local M = {}
 ---@field add_to_existing? boolean
 ---@field loclist_win? integer
 
+---@param item QuickFixItem
+---@param new_text string
+local function update_item_text_keep_diagnostics(item, new_text)
+  -- If this is an "error" item, replace the text with the source line and store that text
+  -- in the user data so we can add it as virtual text later
+  if item.type ~= "" and not vim.endswith(new_text, item.text) then
+    local user_data = util.get_user_data(item)
+    if not user_data.error_text then
+      user_data.error_text = item.text
+      item.user_data = user_data
+    end
+    item.text = new_text
+  end
+end
+
 ---@param opts? quicker.ExpandOpts
 function M.expand(opts)
   opts = opts or {}
@@ -120,16 +135,7 @@ function M.expand(opts)
       local lines = vim.api.nvim_buf_get_lines(item.bufnr, low, high, false)
       for j, line in ipairs(lines) do
         if j + low == item.lnum then
-          -- If this is an "error" item, replace the text with the source line and store that text
-          -- in the user data so we can add it as virtual text later
-          if item.type ~= "" and not vim.endswith(line, item.text) then
-            local user_data = util.get_user_data(item)
-            if not user_data.error_text then
-              user_data.error_text = item.text
-              item.user_data = user_data
-            end
-            item.text = line
-          end
+          update_item_text_keep_diagnostics(item, line)
           table.insert(items, item)
           if i == curpos then
             newpos = #items
@@ -223,8 +229,13 @@ function M.collapse(opts)
   end
 end
 
+---@class (exact) quicker.RefreshOpts
+---@field keep_diagnostics? boolean If a line has a diagnostic type, keep the original text and display it as virtual text after refreshing from source.
+
 ---@param loclist_win? integer
-function M.refresh(loclist_win)
+---@param opts? quicker.RefreshOpts
+function M.refresh(loclist_win, opts)
+  opts = vim.tbl_extend("keep", opts or {}, { keep_diagnostics = true })
   if not loclist_win then
     local ok, qf = pcall(vim.fn.getloclist, 0, { filewinid = 0 })
     if ok and qf.filewinid and qf.filewinid ~= 0 then
@@ -245,9 +256,13 @@ function M.refresh(loclist_win)
       if not vim.api.nvim_buf_is_loaded(item.bufnr) then
         vim.fn.bufload(item.bufnr)
       end
-      local text = vim.api.nvim_buf_get_lines(item.bufnr, item.lnum - 1, item.lnum, false)[1]
-      if text then
-        item.text = text
+      local line = vim.api.nvim_buf_get_lines(item.bufnr, item.lnum - 1, item.lnum, false)[1]
+      if line then
+        if opts.keep_diagnostics then
+          update_item_text_keep_diagnostics(item, line)
+        else
+          item.text = line
+        end
         table.insert(items, item)
       end
     else
