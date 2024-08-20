@@ -23,8 +23,8 @@ local function update_item_text_keep_diagnostics(item, new_text)
       user_data.error_text = item.text
       item.user_data = user_data
     end
-    item.text = new_text
   end
+  item.text = new_text
 end
 
 ---@param opts? quicker.ExpandOpts
