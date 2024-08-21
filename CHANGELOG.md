@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.1.1](https://github.com/stevearc/quicker.nvim/compare/v1.1.0...v1.1.1) (2024-08-20)
+
+
+### Bug Fixes
+
+* refresh replaces all item text with buffer source ([f28fca3](https://github.com/stevearc/quicker.nvim/commit/f28fca3863f8d3679e86d8ff30d023a43fba15c8))
+
 ## [1.1.0](https://github.com/stevearc/quicker.nvim/compare/v1.0.0...v1.1.0) (2024-08-20)
 
 
