@@ -96,22 +96,26 @@ M.is_open = function(loclist_win)
   end
 end
 
+---@class quicker.OpenCmdMods: vim.api.keyset.parse_cmd.mods
+
 ---@class (exact) quicker.OpenOpts
 ---@field loclist? boolean Toggle the loclist instead of the quickfix list
 ---@field focus? boolean Focus the quickfix window after toggling (default false)
 ---@field height? integer Height of the quickfix window when opened. Defaults to number of items in the list.
 ---@field min_height? integer Minimum height of the quickfix window. Default 4.
 ---@field max_height? integer Maximum height of the quickfix window. Default 10.
+---@field open_cmd_mods? quicker.OpenCmdMods A table of modifiers for the quickfix or loclist open commands.
 
 ---Toggle the quickfix or loclist window.
 ---@param opts? quicker.OpenOpts
 M.toggle = function(opts)
-  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer}
+  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods?: quicker.OpenCmdMods}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
     focus = false,
     min_height = 4,
     max_height = 10,
+    open_cmd_mods = {},
   })
   local loclist_win = opts.loclist and 0 or nil
   if M.is_open(loclist_win) then
@@ -124,23 +128,24 @@ end
 ---Open the quickfix or loclist window.
 ---@param opts? quicker.OpenOpts
 M.open = function(opts)
-  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer}
+  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods?: quicker.OpenCmdMods}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
     focus = false,
     min_height = 4,
     max_height = 10,
+    open_cmd_mods = {},
   })
   local height
   if opts.loclist then
-    local ok, err = pcall(vim.cmd.lopen)
+    local ok, err = pcall(vim.cmd.lopen, { mods = opts.open_cmd_mods })
     if not ok then
       vim.notify(err, vim.log.levels.ERROR)
       return
     end
     height = #vim.fn.getloclist(0)
   else
-    vim.cmd.copen()
+    vim.cmd.copen({ mods = opts.open_cmd_mods })
     height = #vim.fn.getqflist()
   end
 
