@@ -123,32 +123,36 @@ toggle({opts})                                                    *quicker.toggl
 
     Parameters:
       {opts} `nil|quicker.OpenOpts`
-          {loclist}    `nil|boolean` Toggle the loclist instead of the quickfix
-                       list
-          {focus}      `nil|boolean` Focus the quickfix window after toggling
-                       (default false)
-          {height}     `nil|integer` Height of the quickfix window when opened.
-                       Defaults to number of items in the list.
-          {min_height} `nil|integer` Minimum height of the quickfix window.
-                       Default 4.
-          {max_height} `nil|integer` Maximum height of the quickfix window.
-                       Default 10.
+          {loclist}       `nil|boolean` Toggle the loclist instead of the
+                          quickfix list
+          {focus}         `nil|boolean` Focus the quickfix window after toggling
+                          (default false)
+          {height}        `nil|integer` Height of the quickfix window when
+                          opened. Defaults to number of items in the list.
+          {min_height}    `nil|integer` Minimum height of the quickfix window.
+                          Default 4.
+          {max_height}    `nil|integer` Maximum height of the quickfix window.
+                          Default 10.
+          {open_cmd_mods} `nil|quicker.OpenCmdMods` A table of modifiers for the
+                          quickfix or loclist open commands.
 
 open({opts})                                                        *quicker.open*
     Open the quickfix or loclist window.
 
     Parameters:
       {opts} `nil|quicker.OpenOpts`
-          {loclist}    `nil|boolean` Toggle the loclist instead of the quickfix
-                       list
-          {focus}      `nil|boolean` Focus the quickfix window after toggling
-                       (default false)
-          {height}     `nil|integer` Height of the quickfix window when opened.
-                       Defaults to number of items in the list.
-          {min_height} `nil|integer` Minimum height of the quickfix window.
-                       Default 4.
-          {max_height} `nil|integer` Maximum height of the quickfix window.
-                       Default 10.
+          {loclist}       `nil|boolean` Toggle the loclist instead of the
+                          quickfix list
+          {focus}         `nil|boolean` Focus the quickfix window after toggling
+                          (default false)
+          {height}        `nil|integer` Height of the quickfix window when
+                          opened. Defaults to number of items in the list.
+          {min_height}    `nil|integer` Minimum height of the quickfix window.
+                          Default 4.
+          {max_height}    `nil|integer` Maximum height of the quickfix window.
+                          Default 10.
+          {open_cmd_mods} `nil|quicker.OpenCmdMods` A table of modifiers for the
+                          quickfix or loclist open commands.
 
 close({opts})                                                      *quicker.close*
     Close the quickfix or loclist window.
