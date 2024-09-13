@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.0](https://github.com/stevearc/quicker.nvim/compare/v1.1.1...v1.2.0) (2024-09-13)
+
+
+### Features
+
+* add command modifiers to the `toggle()` and `open()` APIs ([#24](https://github.com/stevearc/quicker.nvim/issues/24)) ([95a839f](https://github.com/stevearc/quicker.nvim/commit/95a839fafff1c0a7fe970492f5159f41a90974bf))
+
 ## [1.1.1](https://github.com/stevearc/quicker.nvim/compare/v1.1.0...v1.1.1) (2024-08-20)
 
 
