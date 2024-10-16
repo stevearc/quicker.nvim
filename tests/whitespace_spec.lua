@@ -34,4 +34,25 @@ describe("whitespace", function()
     quicker.expand()
     test_util.assert_snapshot(0, "trim_whitespace_expanded")
   end)
+
+  it("handles mixed tabs and spaces", function()
+    local bufnr = vim.fn.bufadd(test_util.make_tmp_file("mixed_whitespace.txt", {
+      "  line 1",
+      "\t\tline 2",
+    }))
+    vim.fn.setqflist({
+      {
+        bufnr = bufnr,
+        text = "  line 1",
+        lnum = 1,
+      },
+      {
+        bufnr = bufnr,
+        text = "\t\tline 2",
+        lnum = 2,
+      },
+    })
+    vim.cmd.copen()
+    test_util.assert_snapshot(0, "trim_mixed_whitespace")
+  end)
 end)

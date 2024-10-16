@@ -93,7 +93,19 @@ local function calc_whitespace_prefix(items)
     if item.bufnr ~= 0 and not item.text:match("^%s*$") then
       local prefix = prefixes[item.bufnr]
       if not prefix or not vim.startswith(item.text, prefix) then
-        prefixes[item.bufnr] = item.text:match("^%s*")
+        local new_prefix = item.text:match("^%s*")
+
+        -- The new line should have strictly less whitespace as the previous line. If not, then
+        -- there is some whitespace disagreement (e.g. tabs vs spaces) and we should not try to trim
+        -- anything.
+        if prefix and not vim.startswith(prefix, new_prefix) then
+          new_prefix = ""
+        end
+        prefixes[item.bufnr] = new_prefix
+
+        if new_prefix == "" then
+          break
+        end
       end
     end
   end
