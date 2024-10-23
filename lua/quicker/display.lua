@@ -200,7 +200,12 @@ local function add_item_highlights_from_buf(qfbufnr, item, line, lnum)
   if item.text:sub(item_space + 1) == src_line:sub(src_space + 1) then
     local offset = line:find(b.vert, 1, true)
     offset = line:find(b.vert, offset + b.vert:len(), true) + b.vert:len() - 1
-    offset = offset - (prefixes[item.bufnr] or ""):len()
+    local prefix = prefixes[item.bufnr]
+    if type(prefix) == "string" then
+      -- Since prefixes get deserialized from vim.b, if there are holes in the map they get
+      -- filled with `vim.NIL`, so we have to check that the retrieved value is a string.
+      offset = offset - prefix:len()
+    end
     offset = offset - src_space + item_space
 
     -- Add treesitter highlights
