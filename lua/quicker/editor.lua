@@ -169,11 +169,13 @@ end
 
 ---@param item QuickFixItem
 ---@param needle quicker.ParsedLine
+---@param src_line nil|string
 ---@return nil|table text_change
 ---@return nil|string error
-local function get_text_edit(item, needle)
-  local src_line = vim.api.nvim_buf_get_lines(item.bufnr, item.lnum - 1, item.lnum, false)[1]
-  if item.text == needle.text then
+local function get_text_edit(item, needle, src_line)
+  if not src_line then
+    return nil
+  elseif item.text == needle.text then
     return nil
   elseif src_line ~= item.text then
     if item.text:gsub("^%s*", "") == src_line:gsub("^%s*", "") then
@@ -285,16 +287,15 @@ local function save_changes(bufnr, loclist_win)
         parsed.text = (prefixes[item.bufnr] or "") .. parsed.text
 
         local src_line = vim.api.nvim_buf_get_lines(item.bufnr, item.lnum - 1, item.lnum, false)[1]
-        if parsed.text ~= src_line then
+        if src_line and parsed.text ~= src_line then
           if parsed.text:gsub("^%s*", "") == src_line:gsub("^%s*", "") then
             -- If they only disagree in their leading whitespace, just take the changes after the
             -- whitespace and assume that the whitespace hasn't changed
             parsed.text = src_line:match("^%s*") .. parsed.text:gsub("^%s*", "")
-          else
           end
         end
 
-        local text_edit, err = get_text_edit(item, parsed)
+        local text_edit, err = get_text_edit(item, parsed, src_line)
         if text_edit then
           local chng_err = add_change(item.bufnr, text_edit)
           if chng_err then
