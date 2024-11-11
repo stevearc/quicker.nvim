@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.2.0](https://github.com/stevearc/quicker.nvim/compare/v1.1.1...v1.2.0) (2024-11-06)
+
+
+### Features
+
+* add command modifiers to the `toggle()` and `open()` APIs ([#24](https://github.com/stevearc/quicker.nvim/issues/24)) ([95a839f](https://github.com/stevearc/quicker.nvim/commit/95a839fafff1c0a7fe970492f5159f41a90974bf))
+
+
+### Bug Fixes
+
+* crash in highlighter ([11f9eb0](https://github.com/stevearc/quicker.nvim/commit/11f9eb0c803bb9ced8c6043805de89c62bd04515))
+* guard against out of date buffer contents ([1fc29de](https://github.com/stevearc/quicker.nvim/commit/1fc29de2172235c076aa1ead6f1ee772398de732))
+* trim_leading_whitespace works with mixed tabs and spaces ([#26](https://github.com/stevearc/quicker.nvim/issues/26)) ([46e0ad6](https://github.com/stevearc/quicker.nvim/commit/46e0ad6c6a1d998a294e13cbb8b7c398e140983a))
+
 ## [1.1.1](https://github.com/stevearc/quicker.nvim/compare/v1.1.0...v1.1.1) (2024-08-20)
 
 
