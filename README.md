@@ -263,13 +263,13 @@ for just the quickfix window.
 `expand(opts)` \
 Expand the context around the quickfix results.
 
-| Param | Type                      | Desc           |                                                                |
-| ----- | ------------------------- | -------------- | -------------------------------------------------------------- |
-| opts  | `nil\|quicker.ExpandOpts` |                |                                                                |
-|       | before                    | `nil\|integer` | Number of lines of context to show before the line (default 2) |
-|       | after                     | `nil\|integer` | Number of lines of context to show after the line (default 2)  |
-|       | add_to_existing           | `nil\|boolean` |                                                                |
-|       | loclist_win               | `nil\|integer` |                                                                |
+| Param            | Type                      | Desc                                                           |
+| ---------------- | ------------------------- | -------------------------------------------------------------- |
+| opts             | `nil\|quicker.ExpandOpts` |                                                                |
+| >before          | `nil\|integer`            | Number of lines of context to show before the line (default 2) |
+| >after           | `nil\|integer`            | Number of lines of context to show after the line (default 2)  |
+| >add_to_existing | `nil\|boolean`            |                                                                |
+| >loclist_win     | `nil\|integer`            |                                                                |
 
 **Note:**
 <pre>
@@ -288,11 +288,11 @@ Collapse the context around quickfix results, leaving only the `valid` items.
 `refresh(loclist_win, opts)` \
 Update the quickfix list with the current buffer text for each item.
 
-| Param       | Type                       | Desc           |                                                                                                                      |
-| ----------- | -------------------------- | -------------- | -------------------------------------------------------------------------------------------------------------------- |
-| loclist_win | `nil\|integer`             |                |                                                                                                                      |
-| opts        | `nil\|quicker.RefreshOpts` |                |                                                                                                                      |
-|             | keep_diagnostics           | `nil\|boolean` | If a line has a diagnostic type, keep the original text and display it as virtual text after refreshing from source. |
+| Param             | Type                       | Desc                                                                                                                 |
+| ----------------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| loclist_win       | `nil\|integer`             |                                                                                                                      |
+| opts              | `nil\|quicker.RefreshOpts` |                                                                                                                      |
+| >keep_diagnostics | `nil\|boolean`             | If a line has a diagnostic type, keep the original text and display it as virtual text after refreshing from source. |
 
 ### is_open(loclist_win)
 
@@ -307,40 +307,40 @@ Update the quickfix list with the current buffer text for each item.
 `toggle(opts)` \
 Toggle the quickfix or loclist window.
 
-| Param | Type                    | Desc                       |                                                                                     |
-| ----- | ----------------------- | -------------------------- | ----------------------------------------------------------------------------------- |
-| opts  | `nil\|quicker.OpenOpts` |                            |                                                                                     |
-|       | loclist                 | `nil\|boolean`             | Toggle the loclist instead of the quickfix list                                     |
-|       | focus                   | `nil\|boolean`             | Focus the quickfix window after toggling (default false)                            |
-|       | height                  | `nil\|integer`             | Height of the quickfix window when opened. Defaults to number of items in the list. |
-|       | min_height              | `nil\|integer`             | Minimum height of the quickfix window. Default 4.                                   |
-|       | max_height              | `nil\|integer`             | Maximum height of the quickfix window. Default 10.                                  |
-|       | open_cmd_mods           | `nil\|quicker.OpenCmdMods` | A table of modifiers for the quickfix or loclist open commands.                     |
+| Param          | Type                       | Desc                                                                                |
+| -------------- | -------------------------- | ----------------------------------------------------------------------------------- |
+| opts           | `nil\|quicker.OpenOpts`    |                                                                                     |
+| >loclist       | `nil\|boolean`             | Toggle the loclist instead of the quickfix list                                     |
+| >focus         | `nil\|boolean`             | Focus the quickfix window after toggling (default false)                            |
+| >height        | `nil\|integer`             | Height of the quickfix window when opened. Defaults to number of items in the list. |
+| >min_height    | `nil\|integer`             | Minimum height of the quickfix window. Default 4.                                   |
+| >max_height    | `nil\|integer`             | Maximum height of the quickfix window. Default 10.                                  |
+| >open_cmd_mods | `nil\|quicker.OpenCmdMods` | A table of modifiers for the quickfix or loclist open commands.                     |
 
 ### open(opts)
 
 `open(opts)` \
 Open the quickfix or loclist window.
 
-| Param | Type                    | Desc                       |                                                                                     |
-| ----- | ----------------------- | -------------------------- | ----------------------------------------------------------------------------------- |
-| opts  | `nil\|quicker.OpenOpts` |                            |                                                                                     |
-|       | loclist                 | `nil\|boolean`             | Toggle the loclist instead of the quickfix list                                     |
-|       | focus                   | `nil\|boolean`             | Focus the quickfix window after toggling (default false)                            |
-|       | height                  | `nil\|integer`             | Height of the quickfix window when opened. Defaults to number of items in the list. |
-|       | min_height              | `nil\|integer`             | Minimum height of the quickfix window. Default 4.                                   |
-|       | max_height              | `nil\|integer`             | Maximum height of the quickfix window. Default 10.                                  |
-|       | open_cmd_mods           | `nil\|quicker.OpenCmdMods` | A table of modifiers for the quickfix or loclist open commands.                     |
+| Param          | Type                       | Desc                                                                                |
+| -------------- | -------------------------- | ----------------------------------------------------------------------------------- |
+| opts           | `nil\|quicker.OpenOpts`    |                                                                                     |
+| >loclist       | `nil\|boolean`             | Toggle the loclist instead of the quickfix list                                     |
+| >focus         | `nil\|boolean`             | Focus the quickfix window after toggling (default false)                            |
+| >height        | `nil\|integer`             | Height of the quickfix window when opened. Defaults to number of items in the list. |
+| >min_height    | `nil\|integer`             | Minimum height of the quickfix window. Default 4.                                   |
+| >max_height    | `nil\|integer`             | Maximum height of the quickfix window. Default 10.                                  |
+| >open_cmd_mods | `nil\|quicker.OpenCmdMods` | A table of modifiers for the quickfix or loclist open commands.                     |
 
 ### close(opts)
 
 `close(opts)` \
 Close the quickfix or loclist window.
 
-| Param | Type                     | Desc           |                                                |
-| ----- | ------------------------ | -------------- | ---------------------------------------------- |
-| opts  | `nil\|quicker.CloseOpts` |                |                                                |
-|       | loclist                  | `nil\|boolean` | Close the loclist instead of the quickfix list |
+| Param    | Type                     | Desc                                           |
+| -------- | ------------------------ | ---------------------------------------------- |
+| opts     | `nil\|quicker.CloseOpts` |                                                |
+| >loclist | `nil\|boolean`           | Close the loclist instead of the quickfix list |
 <!-- /API -->
 
 ## Other Plugins
