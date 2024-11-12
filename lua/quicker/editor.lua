@@ -205,6 +205,19 @@ local function get_text_edit(item, needle, src_line)
   }
 end
 
+---Deserialize qf_prefixes from the buffer, converting vim.NIL to nil
+---@param bufnr integer
+---@return table<integer, string>
+local function load_qf_prefixes(bufnr)
+  local prefixes = vim.b[bufnr].qf_prefixes or {}
+  for k, v in pairs(prefixes) do
+    if v == vim.NIL then
+      prefixes[k] = nil
+    end
+  end
+  return prefixes
+end
+
 ---@param bufnr integer
 ---@param loclist_win? integer
 local function save_changes(bufnr, loclist_win)
@@ -256,7 +269,7 @@ local function save_changes(bufnr, loclist_win)
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, true)
   local errors = {}
   local exit_early = false
-  local prefixes = vim.b[bufnr].qf_prefixes or {}
+  local prefixes = load_qf_prefixes(bufnr)
   for i, line in ipairs(lines) do
     (function()
       local parsed = parse_line(line)
