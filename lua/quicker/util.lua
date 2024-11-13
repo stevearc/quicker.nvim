@@ -36,4 +36,30 @@ M.get_user_data = function(item)
   end
 end
 
+---Get valid location extmarks for a line in the quickfix
+---@param bufnr integer
+---@param lnum integer
+---@param line_len? integer how long this particular line is
+---@param ns? integer namespace of extmarks
+---@return table[] extmarks
+M.get_lnum_extmarks = function(bufnr, lnum, line_len, ns)
+  if not ns then
+    ns = vim.api.nvim_create_namespace("quicker_locations")
+  end
+  if not line_len then
+    local line = vim.api.nvim_buf_get_lines(0, lnum - 1, lnum, true)[1]
+    line_len = line:len()
+  end
+  local extmarks = vim.api.nvim_buf_get_extmarks(
+    bufnr,
+    ns,
+    { lnum - 1, 0 },
+    { lnum - 1, line_len },
+    { details = true }
+  )
+  return vim.tbl_filter(function(mark)
+    return not mark[4].invalid
+  end, extmarks)
+end
+
 return M

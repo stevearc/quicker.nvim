@@ -91,7 +91,7 @@ a.describe("display", function()
     vim.cmd.copen()
 
     -- Wait for highlights to be applied
-    sleep(30)
+    sleep(50)
     local ns = vim.api.nvim_create_namespace("quicker_highlights")
     local marks = vim.api.nvim_buf_get_extmarks(0, ns, 0, -1, { type = "sign" })
     assert.equals(5, #marks)

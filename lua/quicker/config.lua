@@ -23,8 +23,6 @@ local default_config = {
     -- Set to "unmodified" to only write unmodified buffers.
     autosave = "unmodified",
   },
-  -- Keep the cursor to the right of the filename and lnum columns
-  constrain_cursor = true,
   highlight = {
     -- Use treesitter highlighting
     treesitter = true,
@@ -67,7 +65,6 @@ local default_config = {
 
 ---@class quicker.Config
 ---@field on_qf fun(bufnr: number)
----@field constrain_cursor boolean
 ---@field opts table<string, any>
 ---@field keys quicker.Keymap[]
 ---@field use_default_opts boolean
@@ -82,7 +79,6 @@ local M = {}
 
 ---@class (exact) quicker.SetupOptions
 ---@field on_qf? fun(bufnr: number) Callback function to run any custom logic or keymaps for the quickfix buffer
----@field constrain_cursor? boolean Keep the cursor to the right of the filename and lnum columns
 ---@field opts? table<string, any> Local options to set for quickfix
 ---@field keys? quicker.Keymap[] Keymaps to set for the quickfix buffer
 ---@field use_default_opts? boolean Set to false to disable the default options in `opts`
