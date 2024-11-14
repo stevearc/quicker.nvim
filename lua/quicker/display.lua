@@ -47,7 +47,7 @@ local virt_text_highlight_map = {
 }
 
 ---@param item QuickFixItem
-local function get_filename_from_item(item)
+M.get_filename_from_item = function(item)
   if item.module and item.module ~= "" then
     return item.module
   elseif item.bufnr > 0 then
@@ -72,7 +72,7 @@ local function get_cached_qf_col_width(id, items)
   if not cached or cached[2] ~= #items then
     local max_len = 0
     for _, item in ipairs(items) do
-      max_len = math.max(max_len, vim.api.nvim_strwidth(get_filename_from_item(item)))
+      max_len = math.max(max_len, vim.api.nvim_strwidth(M.get_filename_from_item(item)))
     end
 
     cached = { max_len + 1, #items }
@@ -466,7 +466,7 @@ function M.quickfixtextfunc(info)
       -- Matching line
       local lnum = item.lnum == 0 and " " or item.lnum
       table.insert(locations, {
-        { rpad(get_filename_from_item(item), col_width), "QuickFixFilename" },
+        { rpad(M.get_filename_from_item(item), col_width), "QuickFixFilename" },
         { b.vert, "Delimiter" },
         { lnum_fmt:format(lnum), "QuickFixLineNr" },
         { b.vert, "Delimiter" },
@@ -485,7 +485,7 @@ function M.quickfixtextfunc(info)
       -- Other non-matching line
       local lnum = item.lnum == 0 and " " or item.lnum
       table.insert(locations, {
-        { rpad(get_filename_from_item(item), col_width), "QuickFixFilenameInvalid" },
+        { rpad(M.get_filename_from_item(item), col_width), "QuickFixFilenameInvalid" },
         { b.vert, "Delimiter" },
         { lnum_fmt:format(lnum), "QuickFixLineNr" },
         { b.vert, "Delimiter" },
