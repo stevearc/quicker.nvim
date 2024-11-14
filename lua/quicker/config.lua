@@ -100,14 +100,6 @@ M.setup = function(opts)
     M[k] = v
   end
 
-  -- Transparently convert a space into an em quad https://unicode-explorer.com/c/2001
-  -- This is to keep it somewhat unique so it can still be used as an identifiable separator
-  for _, key in ipairs({ "vert", "strong_header", "soft_header" }) do
-    if M.borders[key] == " " then
-      M.borders[key] = " "
-    end
-  end
-
   -- Remove the default opts values if use_default_opts is false
   if not new_conf.use_default_opts then
     M.opts = opts.opts or {}
