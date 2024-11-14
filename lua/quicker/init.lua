@@ -80,6 +80,12 @@ M.collapse = function()
   return require("quicker.context").collapse()
 end
 
+---Toggle the expanded context around the quickfix results.
+---@param opts? quicker.ExpandOpts
+M.toggle_expand = function(opts)
+  return require("quicker.context").toggle(opts)
+end
+
 ---Update the quickfix list with the current buffer text for each item.
 ---@param loclist_win? integer
 ---@param opts? quicker.RefreshOpts

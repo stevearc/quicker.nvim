@@ -283,6 +283,19 @@ one will remain after calling expand().
 Collapse the context around quickfix results, leaving only the `valid` items.
 
 
+### toggle_expand(opts)
+
+`toggle_expand(opts)` \
+Toggle the expanded context around the quickfix results.
+
+| Param            | Type                      | Desc                                                           |
+| ---------------- | ------------------------- | -------------------------------------------------------------- |
+| opts             | `nil\|quicker.ExpandOpts` |                                                                |
+| >before          | `nil\|integer`            | Number of lines of context to show before the line (default 2) |
+| >after           | `nil\|integer`            | Number of lines of context to show after the line (default 2)  |
+| >add_to_existing | `nil\|boolean`            |                                                                |
+| >loclist_win     | `nil\|integer`            |                                                                |
+
 ### refresh(loclist_win, opts)
 
 `refresh(loclist_win, opts)` \

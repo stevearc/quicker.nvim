@@ -229,6 +229,27 @@ function M.collapse(opts)
   end
 end
 
+---@param opts? quicker.ExpandOpts
+function M.toggle(opts)
+  opts = opts or {}
+  local ctx
+  if opts.loclist_win then
+    ctx = vim.fn.getloclist(opts.loclist_win, { context = 0 }).context
+  else
+    ctx = vim.fn.getqflist({ context = 0 }).context
+  end
+
+  if
+    type(ctx) == "table"
+    and ctx.quicker
+    and (ctx.quicker.num_before > 0 or ctx.quicker.num_after > 0)
+  then
+    M.collapse()
+  else
+    M.expand(opts)
+  end
+end
+
 ---@class (exact) quicker.RefreshOpts
 ---@field keep_diagnostics? boolean If a line has a diagnostic type, keep the original text and display it as virtual text after refreshing from source.
 
