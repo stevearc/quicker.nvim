@@ -85,7 +85,7 @@ end
 ---@return table<integer, string>
 local function calc_whitespace_prefix(items)
   local prefixes = {}
-  if not config.trim_leading_whitespace then
+  if config.trim_leading_whitespace ~= "common" then
     return prefixes
   end
 
@@ -469,6 +469,14 @@ function M.quickfixtextfunc(info)
     end
 
     -- Construct the lines and save the filename + lnum to render as virtual text later
+    local trimmed_text
+    if config.trim_leading_whitespace == "all" then
+      trimmed_text = item.text:gsub("^%s*", "")
+    elseif config.trim_leading_whitespace == "common" then
+      trimmed_text = remove_prefix(item.text, prefixes[item.bufnr])
+    else
+      trimmed_text = item.text
+    end
     if item.valid == 1 then
       -- Matching line
       local lnum = item.lnum == 0 and " " or item.lnum
@@ -478,7 +486,7 @@ function M.quickfixtextfunc(info)
         { lnum_fmt:format(lnum), "QuickFixLineNr" },
         { b.vert, "Delimiter" },
       })
-      table.insert(ret, remove_prefix(item.text, prefixes[item.bufnr]))
+      table.insert(ret, trimmed_text)
     elseif user_data.lnum then
       -- Non-matching line from quicker.nvim context lines
       table.insert(locations, {
@@ -487,7 +495,7 @@ function M.quickfixtextfunc(info)
         { lnum_fmt:format(user_data.lnum), "QuickFixLineNr" },
         { b.vert, "Delimiter" },
       })
-      table.insert(ret, remove_prefix(item.text, prefixes[item.bufnr]))
+      table.insert(ret, trimmed_text)
     else
       -- Other non-matching line
       local lnum = item.lnum == 0 and " " or item.lnum
@@ -497,7 +505,7 @@ function M.quickfixtextfunc(info)
         { lnum_fmt:format(lnum), "QuickFixLineNr" },
         { b.vert, "Delimiter" },
       })
-      table.insert(ret, remove_prefix(item.text, prefixes[item.bufnr]))
+      table.insert(ret, trimmed_text)
     end
   end
 
