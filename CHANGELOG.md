@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.3.0](https://github.com/stevearc/quicker.nvim/compare/v1.2.0...v1.3.0) (2024-11-14)
+
+
+### Features
+
+* toggle function for context ([#18](https://github.com/stevearc/quicker.nvim/issues/18)) ([049d665](https://github.com/stevearc/quicker.nvim/commit/049d66534d3de5920663ee1b8dd0096d70f55a67))
+
+
+### Bug Fixes
+
+* filter vim.NIL when deserializing buffer variables ([#30](https://github.com/stevearc/quicker.nvim/issues/30)) ([a3cf525](https://github.com/stevearc/quicker.nvim/commit/a3cf5256998f9387ad8e293c6f295d286be6453f))
+
 ## [1.2.0](https://github.com/stevearc/quicker.nvim/compare/v1.1.1...v1.2.0) (2024-11-06)
 
 
