@@ -512,9 +512,17 @@ function M.quickfixtextfunc(info)
 
   -- Render the filename+lnum and the headers as virtual text
   local start_idx = info.start_idx
-  vim.schedule(function()
+  local set_virt_text
+  set_virt_text = function()
     qf_list = load_qf(info)
     if qf_list.qfbufnr > 0 then
+      -- Sometimes the buffer is not fully populated yet. If so, we should try again later.
+      local num_lines = vim.api.nvim_buf_line_count(qf_list.qfbufnr)
+      if num_lines < info.end_idx then
+        vim.schedule(set_virt_text)
+        return
+      end
+
       local ns = vim.api.nvim_create_namespace("quicker_locations")
       vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, ns, start_idx - 1, -1)
       local idmap = {}
@@ -541,7 +549,8 @@ function M.quickfixtextfunc(info)
         })
       end
     end
-  end)
+  end
+  vim.schedule(set_virt_text)
 
   return ret
 end
