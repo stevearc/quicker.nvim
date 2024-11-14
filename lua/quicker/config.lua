@@ -53,8 +53,8 @@ local default_config = {
     soft_cross = "╂",
     soft_end = "┨",
   },
-  -- Trim the leading whitespace from results
-  trim_leading_whitespace = true,
+  -- How to trim the leading whitespace from results. Can be 'all', 'common', or false
+  trim_leading_whitespace = "common",
   -- Maximum width of the filename column
   max_filename_width = function()
     return math.floor(math.min(95, vim.o.columns / 2))
@@ -64,6 +64,8 @@ local default_config = {
     return vim.o.columns - start_col
   end,
 }
+
+---@alias quicker.TrimEnum "all"|"common"|false
 
 ---@class quicker.Config
 ---@field on_qf fun(bufnr: number)
@@ -75,7 +77,7 @@ local default_config = {
 ---@field edit quicker.EditConfig
 ---@field type_icons table<string, string>
 ---@field borders quicker.Borders
----@field trim_leading_whitespace boolean
+---@field trim_leading_whitespace quicker.TrimEnum
 ---@field max_filename_width fun(): integer
 ---@field header_length fun(type: "hard"|"soft", start_col: integer): integer
 local M = {}
@@ -90,7 +92,7 @@ local M = {}
 ---@field edit? quicker.SetupEditConfig
 ---@field type_icons? table<string, string> Map of quickfix item type to icon
 ---@field borders? quicker.SetupBorders Characters used for drawing the borders
----@field trim_leading_whitespace? boolean Trim the leading whitespace from results
+---@field trim_leading_whitespace? quicker.TrimEnum How to trim the leading whitespace from results
 ---@field max_filename_width? fun(): integer Maximum width of the filename column
 ---@field header_length? fun(type: "hard"|"soft", start_col: integer): integer How far the header should extend to the right
 
@@ -102,6 +104,11 @@ M.setup = function(opts)
 
   for k, v in pairs(new_conf) do
     M[k] = v
+  end
+
+  -- Shim for when this was only a boolean. 'true' meant 'common'
+  if M.trim_leading_whitespace == true then
+    M.trim_leading_whitespace = "common"
   end
 
   -- Remove the default opts values if use_default_opts is false

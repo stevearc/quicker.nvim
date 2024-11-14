@@ -217,10 +217,15 @@ local function save_changes(bufnr, loclist_win)
         if not vim.api.nvim_buf_is_loaded(item.bufnr) then
           vim.fn.bufload(item.bufnr)
         end
-        -- add the whitespace prefix back to the parsed line text
-        text = (prefixes[item.bufnr] or "") .. text
-
         local src_line = vim.api.nvim_buf_get_lines(item.bufnr, item.lnum - 1, item.lnum, false)[1]
+
+        -- add the whitespace prefix back to the parsed line text
+        if config.trim_leading_whitespace == "common" then
+          text = (prefixes[item.bufnr] or "") .. text
+        elseif config.trim_leading_whitespace == "all" and src_line then
+          text = src_line:match("^%s*") .. text
+        end
+
         if src_line and text ~= src_line then
           if text:gsub("^%s*", "") == src_line:gsub("^%s*", "") then
             -- If they only disagree in their leading whitespace, just take the changes after the

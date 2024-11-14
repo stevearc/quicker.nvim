@@ -90,7 +90,7 @@ end
 ---@return table<integer, string>
 local function calc_whitespace_prefix(items)
   local prefixes = {}
-  if not config.trim_leading_whitespace then
+  if config.trim_leading_whitespace ~= "common" then
     return prefixes
   end
 
@@ -495,24 +495,32 @@ function M.quickfixtextfunc(info)
     end
 
     -- Construct the lines and save the filename + lnum to render as virtual text later
+    local trimmed_text
+    if config.trim_leading_whitespace == "all" then
+      trimmed_text = item.text:gsub("^%s*", "")
+    elseif config.trim_leading_whitespace == "common" then
+      trimmed_text = remove_prefix(item.text, prefixes[item.bufnr])
+    else
+      trimmed_text = item.text
+    end
     if item.valid == 1 then
       -- Matching line
       local lnum = item.lnum == 0 and " " or item.lnum
       local filename = rpad(M.get_filename_from_item(item), col_width)
       table.insert(locations, get_virt_text(lnum))
-      table.insert(ret, filename .. EM_QUAD .. remove_prefix(item.text, prefixes[item.bufnr]))
+      table.insert(ret, filename .. EM_QUAD .. trimmed_text)
     elseif user_data.lnum then
       -- Non-matching line from quicker.nvim context lines
       local filename = string.rep(" ", col_width)
       table.insert(locations, get_virt_text(user_data.lnum))
-      table.insert(ret, filename .. EM_QUAD .. remove_prefix(item.text, prefixes[item.bufnr]))
+      table.insert(ret, filename .. EM_QUAD .. trimmed_text)
     else
       -- Other non-matching line
       local lnum = item.lnum == 0 and " " or item.lnum
       local filename = rpad(M.get_filename_from_item(item), col_width)
       table.insert(locations, get_virt_text(lnum))
       invalid_filenames[#locations] = true
-      table.insert(ret, filename .. EM_QUAD .. remove_prefix(item.text, prefixes[item.bufnr]))
+      table.insert(ret, filename .. EM_QUAD .. trimmed_text)
     end
   end
 

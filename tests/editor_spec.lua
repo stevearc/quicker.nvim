@@ -243,8 +243,8 @@ describe("editor", function()
     test_util.assert_snapshot(bufnr, "edit_delim")
   end)
 
-  it("can edit lines with trimmed whitespace", function()
-    require("quicker.config").trim_leading_whitespace = true
+  it("can edit lines with trimmed common whitespace", function()
+    require("quicker.config").trim_leading_whitespace = "common"
     vim.cmd.edit({
       args = {
         test_util.make_tmp_file("edit_whitespace.txt", {
@@ -275,5 +275,73 @@ describe("editor", function()
     replace_text(2, "bar")
     vim.cmd.write()
     test_util.assert_snapshot(bufnr, "edit_whitespace")
+  end)
+
+  it("can edit lines with trimmed all whitespace", function()
+    require("quicker.config").trim_leading_whitespace = "all"
+    vim.cmd.edit({
+      args = {
+        test_util.make_tmp_file("edit_whitespace.txt", {
+          "    line 1",
+          "  line 2",
+          "    line 3",
+          "      line 4",
+        }),
+      },
+    })
+    local bufnr = vim.api.nvim_get_current_buf()
+    vim.fn.setqflist({
+      {
+        bufnr = bufnr,
+        text = "  line 2",
+        lnum = 2,
+      },
+      {
+        bufnr = bufnr,
+        text = "    line 3",
+        lnum = 3,
+      },
+    })
+    vim.cmd.copen()
+    wait_virt_text()
+    test_util.assert_snapshot(0, "edit_all_whitespace_qf")
+    replace_text(1, "foo")
+    replace_text(2, "bar")
+    vim.cmd.write()
+    test_util.assert_snapshot(bufnr, "edit_all_whitespace")
+  end)
+
+  it("can edit lines with untrimmed whitespace", function()
+    require("quicker.config").trim_leading_whitespace = false
+    vim.cmd.edit({
+      args = {
+        test_util.make_tmp_file("edit_whitespace.txt", {
+          "    line 1",
+          "  line 2",
+          "    line 3",
+          "      line 4",
+        }),
+      },
+    })
+    local bufnr = vim.api.nvim_get_current_buf()
+    vim.fn.setqflist({
+      {
+        bufnr = bufnr,
+        text = "  line 2",
+        lnum = 2,
+      },
+      {
+        bufnr = bufnr,
+        text = "    line 3",
+        lnum = 3,
+      },
+    })
+    vim.cmd.copen()
+    wait_virt_text()
+    test_util.assert_snapshot(0, "edit_none_whitespace_qf")
+    replace_text(1, "foo")
+    replace_text(2, "bar")
+    vim.cmd.write()
+    test_util.assert_snapshot(bufnr, "edit_none_whitespace")
   end)
 end)

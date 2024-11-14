@@ -65,8 +65,8 @@ OPTIONS                                                          *quicker-option
         soft_cross = "╂",
         soft_end = "┨",
       },
-      -- Trim the leading whitespace from results
-      trim_leading_whitespace = true,
+      -- How to trim the leading whitespace from results. Can be 'all', 'common', or false
+      trim_leading_whitespace = "common",
       -- Maximum width of the filename column
       max_filename_width = function()
         return math.floor(math.min(95, vim.o.columns / 2))
