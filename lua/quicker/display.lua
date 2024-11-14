@@ -259,18 +259,25 @@ local function highlight_buffer_when_entered(qfbufnr, info)
 end
 
 ---@param info QuickFixTextFuncInfo
----@return {qfbufnr: integer, id: integer, items: QuickFixItem[], context?: any}
-local function load_qf(info)
-  if info.quickfix == 1 then
-    return vim.fn.getqflist({ id = info.id, items = 0, qfbufnr = 0, context = 0 })
+---@return {qfbufnr: integer, id: integer, context?: any}
+---@overload fun(info: QuickFixTextFuncInfo, all: true): {qfbufnr: integer, id: integer, items: QuickFixItem[], context?: any}
+local function load_qf(info, all)
+  local query
+  if all then
+    query = { all = 0 }
   else
-    return vim.fn.getloclist(info.winid, { id = info.id, items = 0, qfbufnr = 0, context = 0 })
+    query = { id = info.id, items = 0, qfbufnr = 0, context = 0 }
+  end
+  if info.quickfix == 1 then
+    return vim.fn.getqflist(query)
+  else
+    return vim.fn.getloclist(info.winid, query)
   end
 end
 
 ---@param info QuickFixTextFuncInfo
 add_qf_highlights = function(info)
-  local qf_list = load_qf(info)
+  local qf_list = load_qf(info, true)
   local qfbufnr = qf_list.qfbufnr
   if not qfbufnr or qfbufnr == 0 then
     return
@@ -414,7 +421,7 @@ end
 ---@return string[]
 function M.quickfixtextfunc(info)
   local b = config.borders
-  local qf_list = load_qf(info)
+  local qf_list = load_qf(info, true)
   local locations = {}
   local headers = {}
   local ret = {}
