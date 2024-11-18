@@ -31,6 +31,10 @@ local default_config = {
     -- Load the referenced buffers to apply more accurate highlights (may be slow)
     load_buffers = true,
   },
+  follow = {
+    -- When quickfix window is open, scroll to closest item to the cursor
+    enabled = false,
+  },
   -- Map of quickfix item type to icon
   type_icons = {
     E = "󰅚 ",
@@ -69,6 +73,7 @@ local default_config = {
 ---@field keys quicker.Keymap[]
 ---@field use_default_opts boolean
 ---@field highlight quicker.HighlightConfig
+---@field follow quicker.FollowConfig
 ---@field edit quicker.EditConfig
 ---@field type_icons table<string, string>
 ---@field borders quicker.Borders
@@ -83,6 +88,7 @@ local M = {}
 ---@field keys? quicker.Keymap[] Keymaps to set for the quickfix buffer
 ---@field use_default_opts? boolean Set to false to disable the default options in `opts`
 ---@field highlight? quicker.SetupHighlightConfig Configure syntax highlighting
+---@field follow? quicker.SetupFollowConfig Configure cursor following
 ---@field edit? quicker.SetupEditConfig
 ---@field type_icons? table<string, string> Map of quickfix item type to icon
 ---@field borders? quicker.SetupBorders Characters used for drawing the borders
@@ -145,6 +151,12 @@ end
 ---@field treesitter? boolean Enable treesitter syntax highlighting
 ---@field lsp? boolean Use LSP semantic token highlighting
 ---@field load_buffers? boolean Load the referenced buffers to apply more accurate highlights (may be slow)
+
+---@class (exact) quicker.FollowConfig
+---@field enabled boolean
+
+---@class (exact) quicker.SetupFollowConfig
+---@field enabled? boolean
 
 ---@class (exact) quicker.EditConfig
 ---@field enabled boolean

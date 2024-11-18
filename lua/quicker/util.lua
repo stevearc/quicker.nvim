@@ -10,6 +10,15 @@ function M.buf_find_win(bufnr)
   end
 end
 
+---@param loclist_win? integer Check if loclist is open for the given window. If nil, check quickfix.
+M.is_open = function(loclist_win)
+  if loclist_win then
+    return vim.fn.getloclist(loclist_win or 0, { winid = 0 }).winid ~= 0
+  else
+    return vim.fn.getqflist({ winid = 0 }).winid ~= 0
+  end
+end
+
 ---@param winid nil|integer
 ---@return nil|"c"|"l"
 M.get_win_type = function(winid)
