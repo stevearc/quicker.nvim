@@ -45,6 +45,16 @@ local function setup(opts)
       end,
     })
   end
+  if config.follow.enabled then
+    vim.api.nvim_create_autocmd({ "CursorMoved", "BufEnter" }, {
+      desc = "quicker.nvim scroll to nearest location in quickfix",
+      pattern = "*",
+      group = aug,
+      callback = function()
+        require("quicker.follow").seek_to_position()
+      end,
+    })
+  end
 
   vim.o.quickfixtextfunc = "v:lua.require'quicker.display'.quickfixtextfunc"
 
@@ -95,11 +105,7 @@ end
 
 ---@param loclist_win? integer Check if loclist is open for the given window. If nil, check quickfix.
 M.is_open = function(loclist_win)
-  if loclist_win then
-    return vim.fn.getloclist(loclist_win or 0, { winid = 0 }).winid ~= 0
-  else
-    return vim.fn.getqflist({ winid = 0 }).winid ~= 0
-  end
+  return require("quicker.util").is_open(loclist_win)
 end
 
 ---@class quicker.OpenCmdMods: vim.api.keyset.parse_cmd.mods
