@@ -213,7 +213,12 @@ local function add_item_highlights_from_buf(qfbufnr, item, line, lnum)
         if end_col == -1 then
           end_col = src_line:len()
         end
-        vim.api.nvim_buf_set_extmark(qfbufnr, ns, lnum - 1, start_col + offset, {
+        -- If the highlight starts at the beginning of the source line, then it might be off the
+        -- buffer in the quickfix because we've removed leading whitespace. If so, clamp the value
+        -- to 0. Except, for some reason 0 gives incorrect results, but -1 works properly even
+        -- though -1 should indicate the *end* of the line. Not sure why this work, but it does.
+        local hl_start = math.max(-1, start_col + offset)
+        vim.api.nvim_buf_set_extmark(qfbufnr, ns, lnum - 1, hl_start, {
           hl_group = hl_group,
           end_col = end_col + offset,
           priority = 100,
