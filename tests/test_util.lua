@@ -79,7 +79,45 @@ end
 ---@param bufnr integer
 ---@param name string
 M.assert_snapshot = function(bufnr, name)
+  -- Wait for the virtual text extmarks to be set
+  if vim.bo[bufnr].filetype == "qf" then
+    vim.wait(10, function()
+      return false
+    end)
+  end
+  local util = require("quicker.util")
   local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+
+  -- Add virtual text to lines
+  local headers = {}
+  local header_ns = vim.api.nvim_create_namespace("quicker_headers")
+  for i, v in ipairs(lines) do
+    local extmarks = util.get_lnum_extmarks(bufnr, i, v:len())
+    assert(#extmarks <= 1, "Expected at most one extmark per line")
+    local mark = extmarks[1]
+    if mark then
+      local virt_text = table.concat(
+        vim.tbl_map(function(vt)
+          return vt[1]
+        end, mark[4].virt_text),
+        ""
+      )
+      lines[i] = virt_text .. v
+
+      extmarks = util.get_lnum_extmarks(bufnr, i, v:len(), header_ns)
+      assert(#extmarks <= 1, "Expected at most one extmark per line")
+      mark = extmarks[1]
+      if mark and mark[4].virt_lines then
+        table.insert(headers, { i, mark[4].virt_lines[1][1][1] })
+      end
+    end
+  end
+
+  for i = #headers, 1, -1 do
+    local lnum, header = unpack(headers[i])
+    table.insert(lines, lnum, header)
+  end
+
   if os.getenv("UPDATE_SNAPSHOTS") then
     save_snapshot(name, lines)
   else

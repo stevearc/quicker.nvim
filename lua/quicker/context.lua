@@ -56,6 +56,7 @@ function M.expand(opts)
     ctx.quicker = quicker_ctx
   end
   local curpos = vim.api.nvim_win_get_cursor(winid)[1]
+  local cur_item = qf_list.items[curpos]
   local newpos
 
   -- calculate the number of lines to show before and after the current line
@@ -118,12 +119,6 @@ function M.expand(opts)
         end
       end
 
-      -- Insert the header
-      if prev_item and not overlaps_previous then
-        local filename = vim.fs.basename(vim.api.nvim_buf_get_name(item.bufnr))
-        table.insert(items, { text = filename, valid = 0, user_data = { header = header_type } })
-      end
-
       local high = item.lnum + num_after
       local next_item = get_next_item(i)
       if next_item then
@@ -132,14 +127,12 @@ function M.expand(opts)
         end
       end
 
+      local item_start_idx = #items
       local lines = vim.api.nvim_buf_get_lines(item.bufnr, low, high, false)
       for j, line in ipairs(lines) do
         if j + low == item.lnum then
           update_item_text_keep_diagnostics(item, line)
           table.insert(items, item)
-          if i == curpos then
-            newpos = #items
-          end
         else
           table.insert(items, {
             bufnr = item.bufnr,
@@ -148,6 +141,18 @@ function M.expand(opts)
             valid = 0,
             user_data = { lnum = low + j },
           })
+        end
+        if cur_item.bufnr == item.bufnr and cur_item.lnum == low + j then
+          newpos = #items
+        end
+      end
+
+      -- Add the header to the first item in this sequence, if one is needed
+      if prev_item and not overlaps_previous then
+        local first_item = items[item_start_idx + 1]
+        if first_item then
+          first_item.user_data = first_item.user_data or {}
+          first_item.user_data.header = header_type
         end
       end
 
@@ -192,6 +197,10 @@ function M.collapse(opts)
   local last_item
   for i, item in ipairs(qf_list.items) do
     if item.valid == 1 then
+      if item.user_data then
+        -- Clear the header, if present
+        item.user_data.header = nil
+      end
       table.insert(items, item)
       if i <= curpos then
         last_item = #items

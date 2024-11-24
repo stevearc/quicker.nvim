@@ -2,18 +2,21 @@ local config = require("quicker.config")
 local quicker = require("quicker")
 local test_util = require("tests.test_util")
 
----@param start_idx integer
----@param end_idx integer
----@param lines string[]
-local function replace_text(start_idx, end_idx, lines)
-  local buflines = vim.api.nvim_buf_get_lines(0, start_idx, end_idx, false)
-  for i, line in ipairs(buflines) do
-    local pieces = vim.split(line, config.borders.vert)
-    pieces[3] = lines[i]
-    pieces[4] = nil -- just in case there was a delimiter in the text
-    buflines[i] = table.concat(pieces, config.borders.vert)
-  end
-  vim.api.nvim_buf_set_lines(0, start_idx, end_idx, false, buflines)
+---@param lnum integer
+---@param line string
+local function replace_text(lnum, line)
+  vim.api.nvim_buf_set_text(0, lnum - 1, 0, lnum - 1, -1, { line })
+end
+
+---@param lnum integer
+local function del_line(lnum)
+  vim.cmd.normal({ args = { string.format("%dggdd", lnum) }, bang = true })
+end
+
+local function wait_virt_text()
+  vim.wait(10, function()
+    return false
+  end)
 end
 
 describe("editor", function()
@@ -32,7 +35,8 @@ describe("editor", function()
       },
     })
     vim.cmd.copen()
-    replace_text(0, -1, { "new text" })
+    wait_virt_text()
+    replace_text(1, "new text")
     vim.cmd.write()
     test_util.assert_snapshot(bufnr, "edit_1")
   end)
@@ -61,9 +65,11 @@ describe("editor", function()
     })
     vim.cmd.copen()
     quicker.expand()
-    replace_text(1, 3, { "new text", "some text" })
-    replace_text(7, 8, { "other text" })
-    replace_text(12, 13, { "final text" })
+    wait_virt_text()
+    replace_text(2, "new text")
+    replace_text(3, "some text")
+    replace_text(7, "other text")
+    replace_text(11, "final text")
     local last_line = vim.api.nvim_buf_line_count(0)
     vim.api.nvim_win_set_cursor(0, { last_line, 0 })
     vim.cmd.write()
@@ -86,7 +92,10 @@ describe("editor", function()
     })
     vim.cmd.copen()
     quicker.expand()
-    replace_text(0, 3, { "first", "second", "third" })
+    wait_virt_text()
+    replace_text(1, "first")
+    replace_text(2, "second")
+    replace_text(3, "third")
     vim.cmd.write()
     test_util.assert_snapshot(bufnr, "edit_expanded")
     test_util.assert_snapshot(0, "edit_expanded_qf")
@@ -103,7 +112,8 @@ describe("editor", function()
       },
     })
     vim.cmd.copen()
-    replace_text(0, -1, { "new text" })
+    wait_virt_text()
+    replace_text(1, "new text")
     test_util.with(function()
       local notify = vim.notify
       ---@diagnostic disable-next-line: duplicate-set-field
@@ -115,6 +125,7 @@ describe("editor", function()
       vim.cmd.write()
     end)
     test_util.assert_snapshot(bufnr, "edit_fail")
+    test_util.assert_snapshot(0, "edit_fail_qf")
   end)
 
   it("can handle multiple qf items on same lnum", function()
@@ -135,13 +146,16 @@ describe("editor", function()
       },
     })
     vim.cmd.copen()
-    replace_text(0, -1, { "first", "second" })
+    wait_virt_text()
+    replace_text(1, "first")
+    replace_text(2, "second")
     vim.cmd.write()
     test_util.assert_snapshot(bufnr, "edit_dupe")
     test_util.assert_snapshot(0, "edit_dupe_qf")
 
     -- If only one of them has a change, it should go through
-    replace_text(0, -1, { "line 2", "second" })
+    replace_text(1, "line 2")
+    replace_text(2, "second")
     vim.cmd.write()
     test_util.assert_snapshot(bufnr, "edit_dupe_2")
     test_util.assert_snapshot(0, "edit_dupe_qf_2")
@@ -168,7 +182,9 @@ describe("editor", function()
       },
     })
     vim.cmd.copen()
-    vim.api.nvim_buf_set_lines(0, 0, -1, false, vim.api.nvim_buf_get_lines(0, 0, 1, false))
+    wait_virt_text()
+    del_line(3)
+    del_line(2)
     vim.cmd.write()
     assert.are.same({
       {
@@ -199,7 +215,8 @@ describe("editor", function()
       },
     })
     vim.cmd.lopen()
-    replace_text(0, -1, { "new text" })
+    wait_virt_text()
+    replace_text(1, "new text")
     vim.cmd.write()
     test_util.assert_snapshot(bufnr, "edit_ll")
   end)
@@ -217,7 +234,8 @@ describe("editor", function()
       },
     })
     vim.cmd.copen()
-    replace_text(0, -1, { line .. " " .. config.borders.vert .. " more text" })
+    wait_virt_text()
+    replace_text(1, line .. " " .. config.borders.vert .. " more text")
     vim.cmd.write()
     test_util.assert_snapshot(bufnr, "edit_delim")
   end)
@@ -248,7 +266,10 @@ describe("editor", function()
       },
     })
     vim.cmd.copen()
-    replace_text(0, -1, { "foo", "bar" })
+    wait_virt_text()
+    test_util.assert_snapshot(0, "edit_whitespace_qf")
+    replace_text(1, "foo")
+    replace_text(2, "bar")
     vim.cmd.write()
     test_util.assert_snapshot(bufnr, "edit_whitespace")
   end)

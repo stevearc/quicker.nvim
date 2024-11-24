@@ -195,8 +195,6 @@ require("quicker").setup({
     -- Set to "unmodified" to only write unmodified buffers.
     autosave = "unmodified",
   },
-  -- Keep the cursor to the right of the filename and lnum columns
-  constrain_cursor = true,
   highlight = {
     -- Use treesitter highlighting
     treesitter = true,
@@ -354,6 +352,25 @@ Close the quickfix or loclist window.
 | -------- | ------------------------ | ---------------------------------------------- |
 | opts     | `nil\|quicker.CloseOpts` |                                                |
 | >loclist | `nil\|boolean`           | Close the loclist instead of the quickfix list |
+
+### find_file(opts)
+
+`find_file(opts)` \
+Select and jump to a file in the quickfix or loclist.
+
+| Param     | Type                        | Desc                                                      |
+| --------- | --------------------------- | --------------------------------------------------------- |
+| opts      | `nil\|quicker.FindFileOpts` |                                                           |
+| >keep_win | `nil\|boolean`              | Keep the cursor in the current window                     |
+| >jump     | `nil\|boolean`              | Jump to the quickfix item location after selecting a file |
+| >last     | `nil\|boolean`              | Jump to the last item of the file instead of the first    |
+
+**Note:**
+<pre>
+This function exists because the filenames are rendered with virtual text, so you cannot find
+them using `/` or similar. This uses vim.ui.select to find and jump to the first quickfix item
+from a particular file.
+</pre>
 <!-- /API -->
 
 ## Other Plugins
