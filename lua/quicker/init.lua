@@ -20,6 +20,10 @@ local function setup(opts)
         desc = "Update the quickfix list with the current buffer text for each item",
       })
 
+      if config.constrain_cursor then
+        require("quicker.cursor").constrain_cursor(args.buf)
+      end
+
       config.on_qf(args.buf)
     end,
   })

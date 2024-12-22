@@ -195,6 +195,8 @@ require("quicker").setup({
     -- Set to "unmodified" to only write unmodified buffers.
     autosave = "unmodified",
   },
+  -- Keep the cursor to the right of the filename and lnum columns
+  constrain_cursor = true,
   highlight = {
     -- Use treesitter highlighting
     treesitter = true,

@@ -1,4 +1,5 @@
 local config = require("quicker.config")
+local display = require("quicker.display")
 local util = require("quicker.util")
 local M = {}
 
@@ -19,6 +20,36 @@ local function plural(n, base, pluralized)
   else
     return base .. "s"
   end
+end
+
+---Replace the text in a quickfix line, preserving the lineno virt text
+---@param bufnr integer
+---@param lnum integer
+---@param new_text string
+local function replace_qf_line(bufnr, lnum, new_text)
+  local old_line = vim.api.nvim_buf_get_lines(bufnr, lnum - 1, lnum, true)[1]
+
+  local old_idx = old_line:find(display.EM_QUAD, 1, true)
+  local new_idx = new_text:find(display.EM_QUAD, 1, true)
+
+  -- If we're missing the em quad delimiter in either the old or new text, the best we can do is
+  -- replace the whole line
+  if not old_idx or not new_idx then
+    vim.api.nvim_buf_set_text(bufnr, lnum - 1, 0, lnum - 1, -1, { new_text })
+    return
+  end
+
+  -- Replace first the text after the em quad, then the filename before.
+  -- This keeps the line number virtual text in the same location.
+  vim.api.nvim_buf_set_text(
+    bufnr,
+    lnum - 1,
+    old_idx + display.EM_QUAD_LEN - 1,
+    lnum - 1,
+    -1,
+    { new_text:sub(new_idx + display.EM_QUAD_LEN) }
+  )
+  vim.api.nvim_buf_set_text(bufnr, lnum - 1, 0, lnum - 1, old_idx, { new_text:sub(1, new_idx) })
 end
 
 ---@param bufnr integer
@@ -164,24 +195,41 @@ local function save_changes(bufnr, loclist_win)
         return
       end
 
+      -- Trim the filename off of the line
+      local idx = string.find(line, display.EM_QUAD, 1, true)
+      if not idx then
+        add_qf_error(
+          bufnr,
+          i,
+          "The delimiter between filename and text has been deleted. Undo, delete line, or :Refresh.",
+          "DiagnosticError"
+        )
+        if winid then
+          vim.api.nvim_win_set_cursor(winid, { i, 0 })
+        end
+        exit_early = true
+        return
+      end
+      local text = line:sub(idx + display.EM_QUAD_LEN)
+
       local item = qf_list.items[found_idx]
       if item.bufnr ~= 0 and item.lnum ~= 0 then
         if not vim.api.nvim_buf_is_loaded(item.bufnr) then
           vim.fn.bufload(item.bufnr)
         end
         -- add the whitespace prefix back to the parsed line text
-        line = (prefixes[item.bufnr] or "") .. line
+        text = (prefixes[item.bufnr] or "") .. text
 
         local src_line = vim.api.nvim_buf_get_lines(item.bufnr, item.lnum - 1, item.lnum, false)[1]
-        if src_line and line ~= src_line then
-          if line:gsub("^%s*", "") == src_line:gsub("^%s*", "") then
+        if src_line and text ~= src_line then
+          if text:gsub("^%s*", "") == src_line:gsub("^%s*", "") then
             -- If they only disagree in their leading whitespace, just take the changes after the
             -- whitespace and assume that the whitespace hasn't changed
-            line = src_line:match("^%s*") .. line:gsub("^%s*", "")
+            text = src_line:match("^%s*") .. text:gsub("^%s*", "")
           end
         end
 
-        local text_edit, err = get_text_edit(item, line, src_line)
+        local text_edit, err = get_text_edit(item, text, src_line)
         if text_edit then
           local chng_err = add_change(item.bufnr, text_edit)
           if chng_err then
@@ -200,7 +248,7 @@ local function save_changes(bufnr, loclist_win)
       end
 
       -- add item to future qflist
-      item.text = line
+      item.text = text
       table.insert(new_items, item)
     end)()
     if exit_early then
@@ -293,7 +341,7 @@ local function save_changes(bufnr, loclist_win)
     vim.schedule(function()
       -- Mark the lines with changes that could not be applied
       for lnum, new_text in pairs(errors) do
-        vim.api.nvim_buf_set_text(bufnr, lnum - 1, 0, lnum - 1, -1, { new_text })
+        replace_qf_line(bufnr, lnum, new_text)
         local item = new_items[lnum]
         local src_line = vim.api.nvim_buf_get_lines(item.bufnr, item.lnum - 1, item.lnum, false)[1]
         add_qf_error(bufnr, lnum, src_line)

@@ -96,13 +96,15 @@ M.assert_snapshot = function(bufnr, name)
     assert(#extmarks <= 1, "Expected at most one extmark per line")
     local mark = extmarks[1]
     if mark then
+      local start_col = mark[3]
+      local data = mark[4]
       local virt_text = table.concat(
         vim.tbl_map(function(vt)
           return vt[1]
-        end, mark[4].virt_text),
+        end, data.virt_text),
         ""
       )
-      lines[i] = virt_text .. v
+      lines[i] = v:sub(0, start_col) .. virt_text .. v:sub(start_col + 1)
 
       extmarks = util.get_lnum_extmarks(bufnr, i, v:len(), header_ns)
       assert(#extmarks <= 1, "Expected at most one extmark per line")

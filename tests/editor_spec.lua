@@ -1,11 +1,14 @@
 local config = require("quicker.config")
+local display = require("quicker.display")
 local quicker = require("quicker")
 local test_util = require("tests.test_util")
 
 ---@param lnum integer
 ---@param line string
 local function replace_text(lnum, line)
-  vim.api.nvim_buf_set_text(0, lnum - 1, 0, lnum - 1, -1, { line })
+  local prev_line = vim.api.nvim_buf_get_lines(0, lnum - 1, lnum, true)[1]
+  local idx = prev_line:find(display.EM_QUAD, 1, true)
+  vim.api.nvim_buf_set_text(0, lnum - 1, idx + display.EM_QUAD_LEN - 1, lnum - 1, -1, { line })
 end
 
 ---@param lnum integer
