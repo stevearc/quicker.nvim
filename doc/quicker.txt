@@ -161,21 +161,5 @@ close({opts})                                                      *quicker.clos
       {opts} `nil|quicker.CloseOpts`
           {loclist} `nil|boolean` Close the loclist instead of the quickfix list
 
-find_file({opts})                                              *quicker.find_file*
-    Select and jump to a file in the quickfix or loclist.
-
-    Parameters:
-      {opts} `nil|quicker.FindFileOpts`
-          {keep_win} `nil|boolean` Keep the cursor in the current window
-          {jump}     `nil|boolean` Jump to the quickfix item location after
-                     selecting a file
-          {last}     `nil|boolean` Jump to the last item of the file instead of
-                     the first
-
-    Note:
-      This function exists because the filenames are rendered with virtual text, so you cannot find
-      them using `/` or similar. This uses vim.ui.select to find and jump to the first quickfix item
-      from a particular file.
-
 ================================================================================
 vim:tw=80:ts=2:ft=help:norl:syntax=help:
