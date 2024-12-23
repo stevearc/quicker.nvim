@@ -49,6 +49,25 @@ a.describe("display", function()
     test_util.assert_snapshot(0, "display_1")
   end)
 
+  a.it("truncates long filenames", function()
+    config.max_filename_width = function()
+      return 10
+    end
+    local bufnr = vim.fn.bufadd(test_util.make_tmp_file(string.rep("f", 10) .. ".txt", 10))
+    vim.fn.setqflist({
+      {
+        bufnr = bufnr,
+        text = "text",
+        lnum = 5,
+        valid = 1,
+      },
+    })
+    vim.cmd.copen()
+    -- Wait for highlights to be applied
+    sleep(50)
+    test_util.assert_snapshot(0, "display_long_1")
+  end)
+
   a.it("sets signs for diagnostics", function()
     local bufnr = vim.fn.bufadd(test_util.make_tmp_file("sign_test.txt", 10))
     vim.fn.setqflist({

@@ -539,10 +539,12 @@ function M.quickfixtextfunc(info)
       vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, filename_ns, start_idx - 1, -1)
 
       local idmap = {}
+      local lines = vim.api.nvim_buf_get_lines(qf_list.qfbufnr, start_idx - 1, -1, false)
       for i, loc in ipairs(locations) do
+        local end_col = lines[i]:find(EM_QUAD, 1, true) or col_width
         local lnum = start_idx + i - 1
         local id =
-          vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, ns, lnum - 1, col_width + EM_QUAD_LEN, {
+          vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, ns, lnum - 1, end_col + EM_QUAD_LEN - 1, {
             right_gravity = false,
             virt_text = loc,
             virt_text_pos = "inline",
@@ -554,7 +556,7 @@ function M.quickfixtextfunc(info)
         vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, filename_ns, lnum - 1, 0, {
           hl_group = invalid_filenames[i] and "QuickFixFilenameInvalid" or "QuickFixFilename",
           right_gravity = false,
-          end_col = col_width,
+          end_col = end_col,
           priority = 100,
           invalidate = true,
         })
