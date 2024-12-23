@@ -68,6 +68,18 @@ a.describe("display", function()
     test_util.assert_snapshot(0, "display_long_1")
   end)
 
+  a.it("renders minimal line when no filenames in results", function()
+    vim.fn.setqflist({
+      {
+        text = "text",
+      },
+    })
+    vim.cmd.copen()
+    -- Wait for highlights to be applied
+    sleep(50)
+    test_util.assert_snapshot(0, "display_minimal_1")
+  end)
+
   a.it("sets signs for diagnostics", function()
     local bufnr = vim.fn.bufadd(test_util.make_tmp_file("sign_test.txt", 10))
     vim.fn.setqflist({

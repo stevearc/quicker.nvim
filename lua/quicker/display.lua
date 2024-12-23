@@ -446,6 +446,22 @@ function M.quickfixtextfunc(info)
   local col_width = get_cached_qf_col_width(info.id, items)
   local lnum_fmt = string.format("%%%ds", lnum_width)
   local prefixes = calc_whitespace_prefix(items)
+  local no_filenames = col_width == 0
+
+  local function get_virt_text(lnum)
+    -- If none of the quickfix items have filenames, we don't need the lnum column and we only need
+    -- to show a single delimiter. Technically we don't need any delimiter, but this maintains some
+    -- of the original qf behavior while being a bit more visually appealing.
+    if no_filenames then
+      return { { b.vert, "Delimiter" } }
+    else
+      return {
+        { b.vert, "Delimiter" },
+        { lnum_fmt:format(lnum), "QuickFixLineNr" },
+        { b.vert, "Delimiter" },
+      }
+    end
+  end
 
   for i = info.start_idx, info.end_idx do
     local item = items[i]
@@ -489,30 +505,18 @@ function M.quickfixtextfunc(info)
       -- Matching line
       local lnum = item.lnum == 0 and " " or item.lnum
       local filename = rpad(M.get_filename_from_item(item), col_width)
-      table.insert(locations, {
-        { b.vert, "Delimiter" },
-        { lnum_fmt:format(lnum), "QuickFixLineNr" },
-        { b.vert, "Delimiter" },
-      })
+      table.insert(locations, get_virt_text(lnum))
       table.insert(ret, filename .. EM_QUAD .. remove_prefix(item.text, prefixes[item.bufnr]))
     elseif user_data.lnum then
       -- Non-matching line from quicker.nvim context lines
       local filename = string.rep(" ", col_width)
-      table.insert(locations, {
-        { b.vert, "Delimiter" },
-        { lnum_fmt:format(user_data.lnum), "QuickFixLineNr" },
-        { b.vert, "Delimiter" },
-      })
+      table.insert(locations, get_virt_text(user_data.lnum))
       table.insert(ret, filename .. EM_QUAD .. remove_prefix(item.text, prefixes[item.bufnr]))
     else
       -- Other non-matching line
       local lnum = item.lnum == 0 and " " or item.lnum
       local filename = rpad(M.get_filename_from_item(item), col_width)
-      table.insert(locations, {
-        { b.vert, "Delimiter" },
-        { lnum_fmt:format(lnum), "QuickFixLineNr" },
-        { b.vert, "Delimiter" },
-      })
+      table.insert(locations, get_virt_text(lnum))
       invalid_filenames[#locations] = true
       table.insert(ret, filename .. EM_QUAD .. remove_prefix(item.text, prefixes[item.bufnr]))
     end
