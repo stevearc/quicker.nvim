@@ -429,11 +429,12 @@ function M.quickfixtextfunc(info)
     if item.valid == 1 then
       -- Matching line
       local lnum = item.lnum == 0 and " " or item.lnum
-      local pieces = {
-        rpad(get_filename_from_item(item), col_width),
-        lnum_fmt:format(lnum),
-        remove_prefix(item.text, prefixes[item.bufnr]),
-      }
+      local pieces = {}
+      if col_width > 1 then
+        table.insert(pieces, rpad(get_filename_from_item(item), col_width))
+      end
+      table.insert(pieces, lnum_fmt:format(lnum))
+      table.insert(pieces, remove_prefix(item.text, prefixes[item.bufnr]))
       table.insert(ret, table.concat(pieces, b.vert))
     elseif user_data.header == "hard" then
       -- Header when expanded QF list
@@ -467,20 +468,22 @@ function M.quickfixtextfunc(info)
       table.insert(ret, table.concat(pieces, ""))
     elseif user_data.lnum then
       -- Non-matching line from quicker.nvim context lines
-      local pieces = {
-        string.rep(" ", col_width),
-        lnum_fmt:format(user_data.lnum),
-        remove_prefix(item.text, prefixes[item.bufnr]),
-      }
+      local pieces = {}
+      if col_width > 1 then
+        table.insert(pieces, string.rep(" ", col_width))
+      end
+      table.insert(pieces, lnum_fmt:format(user_data.lnum))
+      table.insert(pieces, remove_prefix(item.text, prefixes[item.bufnr]))
       table.insert(ret, table.concat(pieces, b.vert))
     else
       -- Other non-matching line
       local lnum = item.lnum == 0 and " " or item.lnum
-      local pieces = {
-        rpad(get_filename_from_item(item), col_width),
-        lnum_fmt:format(lnum),
-        remove_prefix(item.text, prefixes[item.bufnr]),
-      }
+      local pieces = {}
+      if col_width > 1 then
+        table.insert(pieces, rpad(get_filename_from_item(item), col_width))
+      end
+      table.insert(pieces, lnum_fmt:format(lnum))
+      table.insert(pieces, remove_prefix(item.text, prefixes[item.bufnr]))
       table.insert(ret, table.concat(pieces, b.vert))
     end
   end
