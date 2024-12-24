@@ -413,13 +413,7 @@ local function remove_prefix(text, prefix)
     ret = text
   end
 
-  -- Make sure we don't return an empty string, because then Neovim will use the default display
-  -- value of <filename>|<lnum>|
-  if ret == "" then
-    return " "
-  else
-    return ret
-  end
+  return ret
 end
 
 ---@class QuickFixTextFuncInfo
