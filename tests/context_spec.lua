@@ -38,13 +38,13 @@ describe("context", function()
     quicker.expand()
     test_util.assert_snapshot(0, "expand_2")
     -- Cursor stays on the same item
-    assert.equals(14, vim.api.nvim_win_get_cursor(0)[1])
-    vim.api.nvim_win_set_cursor(0, { 15, 0 })
+    assert.equals(12, vim.api.nvim_win_get_cursor(0)[1])
+    vim.api.nvim_win_set_cursor(0, { 14, 0 })
 
     -- Expanding again will produce the same result
     quicker.expand()
     test_util.assert_snapshot(0, "expand_2")
-    assert.equals(16, vim.api.nvim_win_get_cursor(0)[1])
+    assert.equals(14, vim.api.nvim_win_get_cursor(0)[1])
 
     -- Expanding again will produce the same result
     quicker.expand({ add_to_existing = true })

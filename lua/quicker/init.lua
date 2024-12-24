@@ -96,7 +96,7 @@ end
 ---@param loclist_win? integer Check if loclist is open for the given window. If nil, check quickfix.
 M.is_open = function(loclist_win)
   if loclist_win then
-    return vim.fn.getloclist(loclist_win, { winid = 0 }).winid ~= 0
+    return vim.fn.getloclist(loclist_win or 0, { winid = 0 }).winid ~= 0
   else
     return vim.fn.getqflist({ winid = 0 }).winid ~= 0
   end

@@ -5,6 +5,11 @@ local util = require("quicker.util")
 
 local M = {}
 
+local EM_QUAD = " "
+local EM_QUAD_LEN = EM_QUAD:len()
+M.EM_QUAD = EM_QUAD
+M.EM_QUAD_LEN = EM_QUAD_LEN
+
 ---@class (exact) QuickFixUserData
 ---@field header? "hard"|"soft" When present, this line is a header
 ---@field lnum? integer Encode the lnum separately for valid=0 items
@@ -47,7 +52,7 @@ local virt_text_highlight_map = {
 }
 
 ---@param item QuickFixItem
-local function get_filename_from_item(item)
+M.get_filename_from_item = function(item)
   if item.module and item.module ~= "" then
     return item.module
   elseif item.bufnr > 0 then
@@ -72,10 +77,10 @@ local function get_cached_qf_col_width(id, items)
   if not cached or cached[2] ~= #items then
     local max_len = 0
     for _, item in ipairs(items) do
-      max_len = math.max(max_len, vim.api.nvim_strwidth(get_filename_from_item(item)))
+      max_len = math.max(max_len, vim.api.nvim_strwidth(M.get_filename_from_item(item)))
     end
 
-    cached = { max_len + 1, #items }
+    cached = { max_len, #items }
     _col_width_cache[id] = cached
   end
   return cached[1]
@@ -182,7 +187,6 @@ end
 ---@param line string
 ---@param lnum integer
 local function add_item_highlights_from_buf(qfbufnr, item, line, lnum)
-  local b = config.borders
   local prefixes = vim.b[qfbufnr].qf_prefixes or {}
   local ns = vim.api.nvim_create_namespace("quicker_highlights")
   -- TODO re-apply highlights when a buffer is loaded or a LSP receives semantic tokens
@@ -198,8 +202,7 @@ local function add_item_highlights_from_buf(qfbufnr, item, line, lnum)
 
   -- Only add highlights if the text in the quickfix matches the source line
   if item.text:sub(item_space + 1) == src_line:sub(src_space + 1) then
-    local offset = line:find(b.vert, 1, true)
-    offset = line:find(b.vert, offset + b.vert:len(), true) + b.vert:len() - 1
+    local offset = line:find(EM_QUAD, 1, true) + EM_QUAD_LEN - 1
     local prefix = prefixes[item.bufnr]
     if type(prefix) == "string" then
       -- Since prefixes get deserialized from vim.b, if there are holes in the map they get
@@ -212,7 +215,15 @@ local function add_item_highlights_from_buf(qfbufnr, item, line, lnum)
     if config.highlight.treesitter then
       for _, hl in ipairs(highlight.buf_get_ts_highlights(item.bufnr, item.lnum)) do
         local start_col, end_col, hl_group = hl[1], hl[2], hl[3]
-        vim.api.nvim_buf_set_extmark(qfbufnr, ns, lnum - 1, start_col + offset, {
+        if end_col == -1 then
+          end_col = src_line:len()
+        end
+        -- If the highlight starts at the beginning of the source line, then it might be off the
+        -- buffer in the quickfix because we've removed leading whitespace. If so, clamp the value
+        -- to 0. Except, for some reason 0 gives incorrect results, but -1 works properly even
+        -- though -1 should indicate the *end* of the line. Not sure why this work, but it does.
+        local hl_start = math.max(-1, start_col + offset)
+        vim.api.nvim_buf_set_extmark(qfbufnr, ns, lnum - 1, hl_start, {
           hl_group = hl_group,
           end_col = end_col + offset,
           priority = 100,
@@ -258,13 +269,25 @@ local function highlight_buffer_when_entered(qfbufnr, info)
 end
 
 ---@param info QuickFixTextFuncInfo
-add_qf_highlights = function(info)
-  local qf_list
-  if info.quickfix == 1 then
-    qf_list = vim.fn.getqflist({ id = info.id, items = 0, qfbufnr = 0 })
+---@return {qfbufnr: integer, id: integer, context?: any}
+---@overload fun(info: QuickFixTextFuncInfo, all: true): {qfbufnr: integer, id: integer, items: QuickFixItem[], context?: any}
+local function load_qf(info, all)
+  local query
+  if all then
+    query = { all = 0 }
   else
-    qf_list = vim.fn.getloclist(info.winid, { id = info.id, items = 0, qfbufnr = 0 })
+    query = { id = info.id, items = 0, qfbufnr = 0, context = 0 }
   end
+  if info.quickfix == 1 then
+    return vim.fn.getqflist(query)
+  else
+    return vim.fn.getloclist(info.winid, query)
+  end
+end
+
+---@param info QuickFixTextFuncInfo
+add_qf_highlights = function(info)
+  local qf_list = load_qf(info, true)
   local qfbufnr = qf_list.qfbufnr
   if not qfbufnr or qfbufnr == 0 then
     return
@@ -314,8 +337,13 @@ add_qf_highlights = function(info)
       if loaded then
         add_item_highlights_from_buf(qfbufnr, item, line, i)
       elseif config.highlight.treesitter then
-        for _, hl in ipairs(highlight.get_heuristic_ts_highlights(item, line)) do
+        local filename = vim.split(line, EM_QUAD, { plain = true })[1]
+        local offset = filename:len() + EM_QUAD_LEN
+        local text = line:sub(offset + 1)
+        for _, hl in ipairs(highlight.get_heuristic_ts_highlights(item, text)) do
           local start_col, end_col, hl_group = hl[1], hl[2], hl[3]
+          start_col = start_col + offset
+          end_col = end_col + offset
           vim.api.nvim_buf_set_extmark(qfbufnr, ns, i - 1, start_col, {
             hl_group = hl_group,
             end_col = end_col,
@@ -340,17 +368,6 @@ add_qf_highlights = function(info)
         }
       end
       vim.api.nvim_buf_set_extmark(qfbufnr, ns, i - 1, 0, mark)
-    end
-
-    if user_data.header == "hard" then
-      -- We can't highlight to end of line (-1) because if we do, then clearing the extmarks for the
-      -- _next_ line (which we do on the next iteration) will also clear this!
-      vim.api.nvim_buf_add_highlight(qfbufnr, ns, "QuickFixHeaderHard", i - 1, 0, line:len())
-    elseif user_data.header == "soft" then
-      vim.api.nvim_buf_add_highlight(qfbufnr, ns, "QuickFixHeaderSoft", i - 1, 0, line:len())
-    elseif item.valid == 0 then
-      local offset = line:find(config.borders.vert, 1, true) or 1
-      vim.api.nvim_buf_add_highlight(qfbufnr, ns, "QuickFixFilenameInvalid", i - 1, 0, offset - 1)
     end
 
     -- If we've been processing for too long, defer to preserve editor responsiveness
@@ -389,11 +406,14 @@ end
 ---@param text string
 ---@param prefix? string
 local function remove_prefix(text, prefix)
+  local ret
   if prefix and prefix ~= "" then
-    return text:sub(prefix:len() + 1)
+    ret = text:sub(prefix:len() + 1)
   else
-    return text
+    ret = text
   end
+
+  return ret
 end
 
 ---@class QuickFixTextFuncInfo
@@ -407,38 +427,45 @@ end
 -- TODO when appending to a qflist, the alignment can be thrown off
 -- TODO when appending to a qflist, the prefix could mismatch earlier lines
 ---@param info QuickFixTextFuncInfo
+---@return string[]
 function M.quickfixtextfunc(info)
   local b = config.borders
-  local qf_list
+  local qf_list = load_qf(info, true)
+  local locations = {}
+  local invalid_filenames = {}
+  local headers = {}
   local ret = {}
-  if info.quickfix == 1 then
-    qf_list = vim.fn.getqflist({ id = info.id, items = 0, qfbufnr = 0, context = 0 })
-  else
-    qf_list = vim.fn.getloclist(info.winid, { id = info.id, items = 0, qfbufnr = 0, context = 0 })
-  end
-  ---@type QuickFixItem[]
   local items = qf_list.items
   local lnum_width = get_lnum_width(items)
   local col_width = get_cached_qf_col_width(info.id, items)
   local lnum_fmt = string.format("%%%ds", lnum_width)
   local prefixes = calc_whitespace_prefix(items)
+  local no_filenames = col_width == 0
+
+  local function get_virt_text(lnum)
+    -- If none of the quickfix items have filenames, we don't need the lnum column and we only need
+    -- to show a single delimiter. Technically we don't need any delimiter, but this maintains some
+    -- of the original qf behavior while being a bit more visually appealing.
+    if no_filenames then
+      return { { b.vert, "Delimiter" } }
+    else
+      return {
+        { b.vert, "Delimiter" },
+        { lnum_fmt:format(lnum), "QuickFixLineNr" },
+        { b.vert, "Delimiter" },
+      }
+    end
+  end
 
   for i = info.start_idx, info.end_idx do
     local item = items[i]
     local user_data = util.get_user_data(item)
-    if item.valid == 1 then
-      -- Matching line
-      local lnum = item.lnum == 0 and " " or item.lnum
-      local pieces = {
-        rpad(get_filename_from_item(item), col_width),
-        lnum_fmt:format(lnum),
-        remove_prefix(item.text, prefixes[item.bufnr]),
-      }
-      table.insert(ret, table.concat(pieces, b.vert))
-    elseif user_data.header == "hard" then
+
+    -- First check if there's a header that we need to save to render as virtual text later
+    if user_data.header == "hard" then
       -- Header when expanded QF list
       local pieces = {
-        string.rep(b.strong_header, col_width),
+        string.rep(b.strong_header, col_width + 1),
         b.strong_cross,
         string.rep(b.strong_header, lnum_width),
       }
@@ -449,11 +476,11 @@ function M.quickfixtextfunc(info)
       else
         table.insert(pieces, b.strong_end)
       end
-      table.insert(ret, table.concat(pieces, ""))
+      table.insert(headers, { i, { { table.concat(pieces, ""), "QuickFixHeaderHard" } } })
     elseif user_data.header == "soft" then
       -- Soft header when expanded QF list
       local pieces = {
-        string.rep(b.soft_header, col_width),
+        string.rep(b.soft_header, col_width + 1),
         b.soft_cross,
         string.rep(b.soft_header, lnum_width),
       }
@@ -464,41 +491,97 @@ function M.quickfixtextfunc(info)
       else
         table.insert(pieces, b.soft_end)
       end
-      table.insert(ret, table.concat(pieces, ""))
+      table.insert(headers, { i, { { table.concat(pieces, ""), "QuickFixHeaderSoft" } } })
+    end
+
+    -- Construct the lines and save the filename + lnum to render as virtual text later
+    if item.valid == 1 then
+      -- Matching line
+      local lnum = item.lnum == 0 and " " or item.lnum
+      local filename = rpad(M.get_filename_from_item(item), col_width)
+      table.insert(locations, get_virt_text(lnum))
+      table.insert(ret, filename .. EM_QUAD .. remove_prefix(item.text, prefixes[item.bufnr]))
     elseif user_data.lnum then
       -- Non-matching line from quicker.nvim context lines
-      local pieces = {
-        string.rep(" ", col_width),
-        lnum_fmt:format(user_data.lnum),
-        remove_prefix(item.text, prefixes[item.bufnr]),
-      }
-      table.insert(ret, table.concat(pieces, b.vert))
+      local filename = string.rep(" ", col_width)
+      table.insert(locations, get_virt_text(user_data.lnum))
+      table.insert(ret, filename .. EM_QUAD .. remove_prefix(item.text, prefixes[item.bufnr]))
     else
       -- Other non-matching line
       local lnum = item.lnum == 0 and " " or item.lnum
-      local pieces = {
-        rpad(get_filename_from_item(item), col_width),
-        lnum_fmt:format(lnum),
-        remove_prefix(item.text, prefixes[item.bufnr]),
-      }
-      table.insert(ret, table.concat(pieces, b.vert))
+      local filename = rpad(M.get_filename_from_item(item), col_width)
+      table.insert(locations, get_virt_text(lnum))
+      invalid_filenames[#locations] = true
+      table.insert(ret, filename .. EM_QUAD .. remove_prefix(item.text, prefixes[item.bufnr]))
     end
   end
+
+  -- Render the filename+lnum and the headers as virtual text
+  local start_idx = info.start_idx
+  local set_virt_text
+  set_virt_text = function()
+    qf_list = load_qf(info)
+    if qf_list.qfbufnr > 0 then
+      -- Sometimes the buffer is not fully populated yet. If so, we should try again later.
+      local num_lines = vim.api.nvim_buf_line_count(qf_list.qfbufnr)
+      if num_lines < info.end_idx then
+        vim.schedule(set_virt_text)
+        return
+      end
+
+      local ns = vim.api.nvim_create_namespace("quicker_locations")
+      vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, ns, start_idx - 1, -1)
+      local header_ns = vim.api.nvim_create_namespace("quicker_headers")
+      vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, header_ns, start_idx - 1, -1)
+      local filename_ns = vim.api.nvim_create_namespace("quicker_filenames")
+      vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, filename_ns, start_idx - 1, -1)
+
+      local idmap = {}
+      local lines = vim.api.nvim_buf_get_lines(qf_list.qfbufnr, start_idx - 1, -1, false)
+      for i, loc in ipairs(locations) do
+        local end_col = lines[i]:find(EM_QUAD, 1, true) or col_width
+        local lnum = start_idx + i - 1
+        local id =
+          vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, ns, lnum - 1, end_col + EM_QUAD_LEN - 1, {
+            right_gravity = false,
+            virt_text = loc,
+            virt_text_pos = "inline",
+            invalidate = true,
+          })
+        idmap[id] = lnum
+
+        -- Highlight the filename
+        vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, filename_ns, lnum - 1, 0, {
+          hl_group = invalid_filenames[i] and "QuickFixFilenameInvalid" or "QuickFixFilename",
+          right_gravity = false,
+          end_col = end_col,
+          priority = 100,
+          invalidate = true,
+        })
+      end
+      vim.b[qf_list.qfbufnr].qf_ext_id_to_item_idx = idmap
+
+      for _, pair in ipairs(headers) do
+        local i, header = pair[1], pair[2]
+        local lnum = start_idx + i - 1
+        vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, header_ns, lnum - 1, 0, {
+          virt_lines = { header },
+          virt_lines_above = true,
+        })
+      end
+    end
+  end
+  vim.schedule(set_virt_text)
 
   -- If we just rendered the last item, add highlights
   if info.end_idx == #items then
     schedule_highlights(info)
 
-    -- If we have appended some items to the quickfix, we need to update qf_items (just the appended ones)
     if qf_list.qfbufnr > 0 then
-      local stored_items = vim.b[qf_list.qfbufnr].qf_items or {}
-      for i = info.start_idx, info.end_idx do
-        stored_items[i] = items[i]
-      end
-      vim.b[qf_list.qfbufnr].qf_items = stored_items
       vim.b[qf_list.qfbufnr].qf_prefixes = prefixes
     end
   end
+
   return ret
 end
 

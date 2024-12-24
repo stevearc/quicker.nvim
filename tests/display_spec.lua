@@ -49,6 +49,37 @@ a.describe("display", function()
     test_util.assert_snapshot(0, "display_1")
   end)
 
+  a.it("truncates long filenames", function()
+    config.max_filename_width = function()
+      return 10
+    end
+    local bufnr = vim.fn.bufadd(test_util.make_tmp_file(string.rep("f", 10) .. ".txt", 10))
+    vim.fn.setqflist({
+      {
+        bufnr = bufnr,
+        text = "text",
+        lnum = 5,
+        valid = 1,
+      },
+    })
+    vim.cmd.copen()
+    -- Wait for highlights to be applied
+    sleep(50)
+    test_util.assert_snapshot(0, "display_long_1")
+  end)
+
+  a.it("renders minimal line when no filenames in results", function()
+    vim.fn.setqflist({
+      {
+        text = "text",
+      },
+    })
+    vim.cmd.copen()
+    -- Wait for highlights to be applied
+    sleep(50)
+    test_util.assert_snapshot(0, "display_minimal_1")
+  end)
+
   a.it("sets signs for diagnostics", function()
     local bufnr = vim.fn.bufadd(test_util.make_tmp_file("sign_test.txt", 10))
     vim.fn.setqflist({
@@ -91,7 +122,7 @@ a.describe("display", function()
     vim.cmd.copen()
 
     -- Wait for highlights to be applied
-    sleep(30)
+    sleep(50)
     local ns = vim.api.nvim_create_namespace("quicker_highlights")
     local marks = vim.api.nvim_buf_get_extmarks(0, ns, 0, -1, { type = "sign" })
     assert.equals(5, #marks)

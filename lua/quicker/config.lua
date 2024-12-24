@@ -67,10 +67,10 @@ local default_config = {
 
 ---@class quicker.Config
 ---@field on_qf fun(bufnr: number)
----@field constrain_cursor boolean
 ---@field opts table<string, any>
 ---@field keys quicker.Keymap[]
 ---@field use_default_opts boolean
+---@field constrain_cursor boolean
 ---@field highlight quicker.HighlightConfig
 ---@field edit quicker.EditConfig
 ---@field type_icons table<string, string>
@@ -82,10 +82,10 @@ local M = {}
 
 ---@class (exact) quicker.SetupOptions
 ---@field on_qf? fun(bufnr: number) Callback function to run any custom logic or keymaps for the quickfix buffer
----@field constrain_cursor? boolean Keep the cursor to the right of the filename and lnum columns
 ---@field opts? table<string, any> Local options to set for quickfix
 ---@field keys? quicker.Keymap[] Keymaps to set for the quickfix buffer
 ---@field use_default_opts? boolean Set to false to disable the default options in `opts`
+---@field constrain_cursor? boolean Keep the cursor to the right of the filename and lnum columns
 ---@field highlight? quicker.SetupHighlightConfig Configure syntax highlighting
 ---@field edit? quicker.SetupEditConfig
 ---@field type_icons? table<string, string> Map of quickfix item type to icon
@@ -102,14 +102,6 @@ M.setup = function(opts)
 
   for k, v in pairs(new_conf) do
     M[k] = v
-  end
-
-  -- Transparently convert a space into an em quad https://unicode-explorer.com/c/2001
-  -- This is to keep it somewhat unique so it can still be used as an identifiable separator
-  for _, key in ipairs({ "vert", "strong_header", "soft_header" }) do
-    if M.borders[key] == " " then
-      M.borders[key] = " "
-    end
   end
 
   -- Remove the default opts values if use_default_opts is false

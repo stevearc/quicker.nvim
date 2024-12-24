@@ -1,4 +1,3 @@
-local config = require("quicker.config")
 local M = {}
 
 ---@class quicker.TSHighlight
@@ -162,12 +161,6 @@ end
 ---@param line string
 ---@return quicker.TSHighlight[]
 M.get_heuristic_ts_highlights = function(item, line)
-  local offset = line:find(config.borders.vert, 1, true)
-  offset = line:find(config.borders.vert, offset + config.borders.vert:len(), true)
-    + config.borders.vert:len()
-    - 1
-  local text = line:sub(offset + 1)
-
   local filetype = vim.filetype.match({ buf = item.bufnr })
   if not filetype then
     return {}
@@ -178,7 +171,7 @@ M.get_heuristic_ts_highlights = function(item, line)
     return {}
   end
 
-  local has_parser, parser = pcall(vim.treesitter.get_string_parser, text, lang)
+  local has_parser, parser = pcall(vim.treesitter.get_string_parser, line, lang)
   if not has_parser then
     return {}
   end
@@ -190,19 +183,19 @@ M.get_heuristic_ts_highlights = function(item, line)
   end
 
   local highlights = {}
-  for capture, node, metadata in query:iter_captures(root, text) do
+  for capture, node, metadata in query:iter_captures(root, line) do
     if capture == nil then
       break
     end
 
-    local range = vim.treesitter.get_range(node, text, metadata[capture])
+    local range = vim.treesitter.get_range(node, line, metadata[capture])
     local start_row, start_col, _, end_row, end_col, _ = unpack(range)
     local capture_name = query.captures[capture]
     local hl = string.format("@%s.%s", capture_name, lang)
     if end_row > start_row then
       end_col = -1
     end
-    table.insert(highlights, { start_col + offset, end_col + offset, hl })
+    table.insert(highlights, { start_col, end_col, hl })
   end
 
   return highlights
