@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.3.0](https://github.com/stevearc/quicker.nvim/compare/v1.2.0...v1.3.0) (2024-12-24)
+
+
+### Features
+
+* add option to remove all leading whitespace from items ([#26](https://github.com/stevearc/quicker.nvim/issues/26)) ([da7e910](https://github.com/stevearc/quicker.nvim/commit/da7e9104de4ff9303e1c722f7c9216f994622067))
+* option to scroll to closest quickfix item ([#23](https://github.com/stevearc/quicker.nvim/issues/23)) ([cc8bb67](https://github.com/stevearc/quicker.nvim/commit/cc8bb67271c093a089d205def9dd69a188c45ae1))
+* toggle function for context ([#18](https://github.com/stevearc/quicker.nvim/issues/18)) ([049d665](https://github.com/stevearc/quicker.nvim/commit/049d66534d3de5920663ee1b8dd0096d70f55a67))
+
+
+### Bug Fixes
+
+* filter vim.NIL when deserializing buffer variables ([#30](https://github.com/stevearc/quicker.nvim/issues/30)) ([a3cf525](https://github.com/stevearc/quicker.nvim/commit/a3cf5256998f9387ad8e293c6f295d286be6453f))
+
 ## [1.2.0](https://github.com/stevearc/quicker.nvim/compare/v1.1.1...v1.2.0) (2024-11-06)
 
 
