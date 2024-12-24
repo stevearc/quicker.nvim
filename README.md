@@ -205,6 +205,10 @@ require("quicker").setup({
     -- Load the referenced buffers to apply more accurate highlights (may be slow)
     load_buffers = true,
   },
+  follow = {
+    -- When quickfix window is open, scroll to closest item to the cursor
+    enabled = false,
+  },
   -- Map of quickfix item type to icon
   type_icons = {
     E = "󰅚 ",
