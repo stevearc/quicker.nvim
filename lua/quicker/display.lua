@@ -210,6 +210,9 @@ local function add_item_highlights_from_buf(qfbufnr, item, line, lnum)
       offset = offset - prefix:len()
     end
     offset = offset - src_space + item_space
+    if config.trim_leading_whitespace == "all" then
+      offset = offset - item_space
+    end
 
     -- Add treesitter highlights
     if config.highlight.treesitter then
