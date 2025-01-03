@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.1](https://github.com/stevearc/quicker.nvim/compare/v1.3.0...v1.3.1) (2025-01-03)
+
+
+### Bug Fixes
+
+* hide filename when max_filename_width = 0 ([#36](https://github.com/stevearc/quicker.nvim/issues/36)) ([e4fb0b1](https://github.com/stevearc/quicker.nvim/commit/e4fb0b1862284757561d1d51091cdee907585948))
+* highlights when trim_leading_whitespace = 'all' ([87dae0f](https://github.com/stevearc/quicker.nvim/commit/87dae0f25733b7bd79b600a70ca38040db68ec0b))
+
 ## [1.3.0](https://github.com/stevearc/quicker.nvim/compare/v1.2.0...v1.3.0) (2024-12-24)
 
 
