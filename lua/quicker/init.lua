@@ -137,6 +137,13 @@ M.toggle = function(opts)
   end
 end
 
+---@alias quicker.WinRestoreDict { height: integer, view: vim.fn.winsaveview.ret }
+
+M._winrestore = {
+  loclist = {}, ---@type quicker.WinRestoreDict
+  quickfix = {}, ---@type quicker.WinRestoreDict
+}
+
 ---Open the quickfix or loclist window.
 ---@param opts? quicker.OpenOpts
 M.open = function(opts)
@@ -148,6 +155,7 @@ M.open = function(opts)
     max_height = 10,
     open_cmd_mods = {},
   })
+  local winrestore
   local height
   if opts.loclist then
     local ok, err = pcall(vim.cmd.lopen, { mods = opts.open_cmd_mods })
@@ -155,14 +163,25 @@ M.open = function(opts)
       vim.notify(err, vim.log.levels.ERROR)
       return
     end
+    winrestore = M._winrestore.loclist
     height = #vim.fn.getloclist(0)
   else
     vim.cmd.copen({ mods = opts.open_cmd_mods })
+    winrestore = M._winrestore.quickfix
     height = #vim.fn.getqflist()
   end
 
   height = math.min(opts.max_height, math.max(opts.min_height, height))
+
+  if require("quicker.config").winrestore.height and winrestore.height then
+    height = winrestore.height
+  end
+
   vim.api.nvim_win_set_height(0, height)
+
+  if require("quicker.config").winrestore.view and winrestore.view then
+    vim.fn.winrestview(winrestore.view)
+  end
 
   if not opts.focus then
     vim.cmd.wincmd({ args = { "p" } })
@@ -176,8 +195,18 @@ end
 ---@param opts? quicker.CloseOpts
 M.close = function(opts)
   if opts and opts.loclist then
+    local lwinid = vim.fn.getloclist(0, { winid = 0 }).winid
+    M._winrestore.loclist = {
+      height = vim.api.nvim_win_get_height(lwinid),
+      view = vim.fn.winsaveview(),
+    }
     vim.cmd.lclose()
   else
+    local cwinid = vim.fn.getqflist({ winid = 0 }).winid
+    M._winrestore.quickfix = {
+      height = vim.api.nvim_win_get_height(cwinid),
+      view = vim.fn.winsaveview(),
+    }
     vim.cmd.cclose()
   end
 end

@@ -10,6 +10,13 @@ local default_config = {
   },
   -- Set to false to disable the default options in `opts`
   use_default_opts = true,
+  -- Restore the previous quickfix window view parameters, such as height and cursor position, on `quicker.open` and `quicker.toggle`
+  winrestore = {
+    -- Restore the height of the quickfix window
+    height = false,
+    -- Restore cursor and scroll positions. See `:h winsaveview()`
+    view = true,
+  },
   -- Keymaps to set for the quickfix buffer
   keys = {
     -- { ">", "<cmd>lua require('quicker').expand()<CR>", desc = "Expand quickfix content" },
@@ -76,6 +83,7 @@ local default_config = {
 ---@field opts table<string, any>
 ---@field keys quicker.Keymap[]
 ---@field use_default_opts boolean
+---@field winrestore quicker.WinRestoreConfig
 ---@field constrain_cursor boolean
 ---@field highlight quicker.HighlightConfig
 ---@field follow quicker.FollowConfig
@@ -92,6 +100,7 @@ local M = {}
 ---@field opts? table<string, any> Local options to set for quickfix
 ---@field keys? quicker.Keymap[] Keymaps to set for the quickfix buffer
 ---@field use_default_opts? boolean Set to false to disable the default options in `opts`
+---@field winrestore? quicker.SetupWinRestoreConfig -- Restore the previous quickfix window view parameters, such as height and cursor position, on `quicker.open` and `quicker.toggle`
 ---@field constrain_cursor? boolean Keep the cursor to the right of the filename and lnum columns
 ---@field highlight? quicker.SetupHighlightConfig Configure syntax highlighting
 ---@field follow? quicker.SetupFollowConfig Configure cursor following
@@ -152,6 +161,14 @@ end
 ---@field soft_header? string Soft headers separate results within the same file
 ---@field soft_cross? string
 ---@field soft_end? string
+
+---@class (exact) quicker.WinRestoreConfig
+---@field height boolean
+---@field view boolean
+
+---@class (exact) quicker.SetupWinRestoreConfig
+---@field height? boolean
+---@field view? boolean
 
 ---@class (exact) quicker.HighlightConfig
 ---@field treesitter boolean
