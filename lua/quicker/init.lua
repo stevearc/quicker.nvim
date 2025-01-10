@@ -175,10 +175,18 @@ M.open = function(opts)
     height = #vim.fn.getqflist()
   end
 
-  height = math.min(opts.max_height, math.max(opts.min_height, height))
+  local clamp = function(h)
+    return math.min(opts.max_height, math.max(opts.min_height, h))
+  end
+
+  height = clamp(height)
 
   if require("quicker.config").winrestore.height and winrestore.height then
-    height = winrestore.height
+    if require("quicker.config").winrestore.height_minmax then
+      height = clamp(winrestore.height)
+    else
+      height = winrestore.height
+    end
   end
 
   vim.api.nvim_win_set_height(0, height)

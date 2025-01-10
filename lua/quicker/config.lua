@@ -14,6 +14,8 @@ local default_config = {
   winrestore = {
     -- Restore the height of the quickfix window
     height = false,
+    -- Respect the min_height and max_height arguments for `quicker.open` and `quicker.toggle`
+    height_minmax = false,
     -- Restore cursor and scroll positions. See `:h winsaveview()`
     view = true,
   },
@@ -164,10 +166,12 @@ end
 
 ---@class (exact) quicker.WinRestoreConfig
 ---@field height boolean
+---@field height_minmax boolean
 ---@field view boolean
 
 ---@class (exact) quicker.SetupWinRestoreConfig
 ---@field height? boolean
+---@field height_minmax? boolean
 ---@field view? boolean
 
 ---@class (exact) quicker.HighlightConfig
