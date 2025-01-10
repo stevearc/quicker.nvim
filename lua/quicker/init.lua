@@ -155,6 +155,10 @@ M.open = function(opts)
     max_height = 10,
     open_cmd_mods = {},
   })
+
+  local from_winid = vim.fn.win_getid()
+  local from_winview = vim.fn.winsaveview()
+
   local winrestore
   local height
   if opts.loclist then
@@ -183,8 +187,13 @@ M.open = function(opts)
     vim.fn.winrestview(winrestore.view)
   end
 
-  if not opts.focus then
-    vim.cmd.wincmd({ args = { "p" } })
+  local to_winid = vim.fn.win_getid()
+
+  vim.fn.win_gotoid(from_winid)
+  vim.fn.winrestview(from_winview)
+
+  if opts.focus then
+    vim.fn.win_gotoid(to_winid)
   end
 end
 
