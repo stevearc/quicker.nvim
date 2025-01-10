@@ -182,6 +182,15 @@ require("quicker").setup({
   },
   -- Set to false to disable the default options in `opts`
   use_default_opts = true,
+  -- Restore the previous quickfix window view parameters, such as height and cursor position, on `quicker.open` and `quicker.toggle`
+  winrestore = {
+    -- Restore the height of the quickfix window
+    height = false,
+    -- Respect the min_height and max_height arguments for `quicker.open` and `quicker.toggle`
+    height_minmax = false,
+    -- Restore cursor and scroll positions. See `:h winsaveview()`
+    view = true,
+  },
   -- Keymaps to set for the quickfix buffer
   keys = {
     -- { ">", "<cmd>lua require('quicker').expand()<CR>", desc = "Expand quickfix content" },
