@@ -140,6 +140,7 @@ end
 ---Open the quickfix or loclist window.
 ---@param opts? quicker.OpenOpts
 M.open = function(opts)
+  local util = require("quicker.util")
   ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods?: quicker.OpenCmdMods}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
@@ -161,8 +162,11 @@ M.open = function(opts)
     height = #vim.fn.getqflist()
   end
 
-  height = math.min(opts.max_height, math.max(opts.min_height, height))
-  vim.api.nvim_win_set_height(0, height)
+  -- only set the height if the quickfix is not a full-height vsplit
+  if not util.is_full_height_vsplit(0) then
+    height = math.min(opts.max_height, math.max(opts.min_height, height))
+    vim.api.nvim_win_set_height(0, height)
+  end
 
   if not opts.focus then
     vim.cmd.wincmd({ args = { "p" } })
