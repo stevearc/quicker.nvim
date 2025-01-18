@@ -71,4 +71,12 @@ M.get_lnum_extmarks = function(bufnr, lnum, line_len, ns)
   end, extmarks)
 end
 
+---Limit the value to a range between a minimum and maximum
+---@param min integer
+---@param val integer
+---@param max integer
+M.clamp = function(min, val, max)
+  return math.max(min, math.min(val, max))
+end
+
 return M

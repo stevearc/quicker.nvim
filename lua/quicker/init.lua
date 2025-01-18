@@ -140,6 +140,7 @@ end
 ---Open the quickfix or loclist window.
 ---@param opts? quicker.OpenOpts
 M.open = function(opts)
+  local util = require("quicker.util")
   ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods?: quicker.OpenCmdMods}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
@@ -148,21 +149,27 @@ M.open = function(opts)
     max_height = 10,
     open_cmd_mods = {},
   })
+  local clamp = function(val)
+    return util.clamp(opts.min_height, val, opts.max_height)
+  end
   local height
   if opts.loclist then
-    local ok, err = pcall(vim.cmd.lopen, { mods = opts.open_cmd_mods })
+    height = opts.height or clamp(#vim.fn.getloclist(0))
+    local ok, err = pcall(vim.cmd.lopen, {
+      count = height,
+      mods = opts.open_cmd_mods,
+    })
     if not ok then
       vim.notify(err, vim.log.levels.ERROR)
       return
     end
-    height = #vim.fn.getloclist(0)
   else
-    vim.cmd.copen({ mods = opts.open_cmd_mods })
-    height = #vim.fn.getqflist()
+    height = opts.height or clamp(#vim.fn.getqflist())
+    vim.cmd.copen({
+      count = height,
+      mods = opts.open_cmd_mods,
+    })
   end
-
-  height = math.min(opts.max_height, math.max(opts.min_height, height))
-  vim.api.nvim_win_set_height(0, height)
 
   if not opts.focus then
     vim.cmd.wincmd({ args = { "p" } })
