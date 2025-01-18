@@ -109,6 +109,7 @@ M.is_open = function(loclist_win)
 end
 
 ---@class quicker.OpenCmdMods: vim.api.keyset.parse_cmd.mods
+---@class quicker.WinViewDict: vim.fn.winrestview.dict
 
 ---@class (exact) quicker.OpenOpts
 ---@field loclist? boolean Toggle the loclist instead of the quickfix list
@@ -117,17 +118,19 @@ end
 ---@field min_height? integer Minimum height of the quickfix window. Default 4.
 ---@field max_height? integer Maximum height of the quickfix window. Default 16.
 ---@field open_cmd_mods? quicker.OpenCmdMods A table of modifiers for the quickfix or loclist open commands.
+---@field view? quicker.WinViewDict A table of options to restore the view of the quickfix window. Can be used to set the cursor or scroll positions (see `winsaveview()`).
 
 ---Toggle the quickfix or loclist window.
 ---@param opts? quicker.OpenOpts
 M.toggle = function(opts)
-  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods}
+  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods, view: quicker.WinViewDict}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
     focus = false,
     min_height = 4,
     max_height = 16,
     open_cmd_mods = {},
+    view = {},
   })
   local loclist_win = opts.loclist and 0 or nil
   if M.is_open(loclist_win) then
@@ -141,13 +144,14 @@ end
 ---@param opts? quicker.OpenOpts
 M.open = function(opts)
   local util = require("quicker.util")
-  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods}
+  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods, view: quicker.WinViewDict}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
     focus = false,
     min_height = 4,
     max_height = 16,
     open_cmd_mods = {},
+    view = {},
   })
   local clamp = function(val)
     return util.clamp(opts.min_height, val, opts.max_height)
@@ -169,6 +173,10 @@ M.open = function(opts)
       count = height,
       mods = opts.open_cmd_mods,
     })
+  end
+
+  if next(opts.view) then
+    vim.fn.winrestview(opts.view)
   end
 
   if not opts.focus then
