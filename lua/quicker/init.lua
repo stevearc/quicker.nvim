@@ -121,7 +121,7 @@ end
 ---Toggle the quickfix or loclist window.
 ---@param opts? quicker.OpenOpts
 M.toggle = function(opts)
-  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods?: quicker.OpenCmdMods}
+  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
     focus = false,
@@ -141,7 +141,7 @@ end
 ---@param opts? quicker.OpenOpts
 M.open = function(opts)
   local util = require("quicker.util")
-  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods?: quicker.OpenCmdMods}
+  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
     focus = false,
