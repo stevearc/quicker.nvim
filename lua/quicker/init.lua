@@ -115,7 +115,7 @@ end
 ---@field focus? boolean Focus the quickfix window after toggling (default false)
 ---@field height? integer Height of the quickfix window when opened. Defaults to number of items in the list.
 ---@field min_height? integer Minimum height of the quickfix window. Default 4.
----@field max_height? integer Maximum height of the quickfix window. Default 10.
+---@field max_height? integer Maximum height of the quickfix window. Default 16.
 ---@field open_cmd_mods? quicker.OpenCmdMods A table of modifiers for the quickfix or loclist open commands.
 
 ---Toggle the quickfix or loclist window.
@@ -126,7 +126,7 @@ M.toggle = function(opts)
     loclist = false,
     focus = false,
     min_height = 4,
-    max_height = 10,
+    max_height = 16,
     open_cmd_mods = {},
   })
   local loclist_win = opts.loclist and 0 or nil
@@ -146,7 +146,7 @@ M.open = function(opts)
     loclist = false,
     focus = false,
     min_height = 4,
-    max_height = 10,
+    max_height = 16,
     open_cmd_mods = {},
   })
   local clamp = function(val)
