@@ -333,6 +333,7 @@ Toggle the quickfix or loclist window.
 | >min_height    | `nil\|integer`             | Minimum height of the quickfix window. Ignored if height is defined explicitly. Default 4.  |
 | >max_height    | `nil\|integer`             | Maximum height of the quickfix window. Ignored if height is defined explicitly. Default 10. |
 | >open_cmd_mods | `nil\|quicker.OpenCmdMods` | A table of modifiers for the quickfix or loclist open commands.                             |
+| >view          | `nil\|quicker.WinViewDict` | A table of options to restore the view of the quickfix window. Can be used to set the cursor or scroll positions (see `winsaveview()`). |
 
 ### open(opts)
 
@@ -348,6 +349,7 @@ Open the quickfix or loclist window.
 | >min_height    | `nil\|integer`             | Minimum height of the quickfix window. Ignored if height is defined explicitly. Default 4.  |
 | >max_height    | `nil\|integer`             | Maximum height of the quickfix window. Ignored if height is defined explicitly. Default 10. |
 | >open_cmd_mods | `nil\|quicker.OpenCmdMods` | A table of modifiers for the quickfix or loclist open commands.                             |
+| >view          | `nil\|quicker.WinViewDict` | A table of options to restore the view of the quickfix window. Can be used to set the cursor or scroll positions (see `winsaveview()`). |
 
 ### close(opts)
 
