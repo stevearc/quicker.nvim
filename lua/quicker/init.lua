@@ -175,7 +175,7 @@ M.open = function(opts)
     })
   end
 
-  if next(opts.view) then
+  if not vim.tbl_isempty(opts.view) then
     vim.fn.winrestview(opts.view)
   end
 
