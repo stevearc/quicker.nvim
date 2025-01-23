@@ -109,7 +109,7 @@ M.is_open = function(loclist_win)
 end
 
 ---@class quicker.OpenCmdMods: vim.api.keyset.parse_cmd.mods
----@class quicker.WinViewDict: vim.fn.winrestview.dict
+---@alias quicker.WinViewDict vim.fn.winrestview.dict
 
 ---@class (exact) quicker.OpenOpts
 ---@field loclist? boolean Toggle the loclist instead of the quickfix list
