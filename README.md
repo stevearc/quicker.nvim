@@ -203,7 +203,7 @@ require("quicker").setup({
     -- Use LSP semantic token highlighting
     lsp = true,
     -- Load the referenced buffers to apply more accurate highlights (may be slow)
-    load_buffers = true,
+    load_buffers = false,
   },
   follow = {
     -- When quickfix window is open, scroll to closest item to the cursor
