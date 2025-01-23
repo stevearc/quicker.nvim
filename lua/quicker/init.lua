@@ -175,6 +175,12 @@ M.open = function(opts)
     })
   end
 
+  -- only set the height if the quickfix is not a full-height vsplit
+  if not util.is_full_height_vsplit(0) then
+    height = math.min(opts.max_height, math.max(opts.min_height, height))
+    vim.api.nvim_win_set_height(0, height)
+  end
+
   if not vim.tbl_isempty(opts.view) then
     vim.fn.winrestview(opts.view)
   end
