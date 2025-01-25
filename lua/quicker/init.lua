@@ -109,25 +109,28 @@ M.is_open = function(loclist_win)
 end
 
 ---@class quicker.OpenCmdMods: vim.api.keyset.parse_cmd.mods
+---@alias quicker.WinViewDict vim.fn.winrestview.dict
 
 ---@class (exact) quicker.OpenOpts
 ---@field loclist? boolean Toggle the loclist instead of the quickfix list
 ---@field focus? boolean Focus the quickfix window after toggling (default false)
 ---@field height? integer Height of the quickfix window when opened. Defaults to number of items in the list.
 ---@field min_height? integer Minimum height of the quickfix window. Default 4.
----@field max_height? integer Maximum height of the quickfix window. Default 10.
+---@field max_height? integer Maximum height of the quickfix window. Default 16.
 ---@field open_cmd_mods? quicker.OpenCmdMods A table of modifiers for the quickfix or loclist open commands.
+---@field view? quicker.WinViewDict A table of options to restore the view of the quickfix window. Can be used to set the cursor or scroll positions (see `winsaveview()`).
 
 ---Toggle the quickfix or loclist window.
 ---@param opts? quicker.OpenOpts
 M.toggle = function(opts)
-  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods?: quicker.OpenCmdMods}
+  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods, view: quicker.WinViewDict}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
     focus = false,
     min_height = 4,
-    max_height = 10,
+    max_height = 16,
     open_cmd_mods = {},
+    view = {},
   })
   local loclist_win = opts.loclist and 0 or nil
   if M.is_open(loclist_win) then
@@ -141,31 +144,39 @@ end
 ---@param opts? quicker.OpenOpts
 M.open = function(opts)
   local util = require("quicker.util")
-  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods?: quicker.OpenCmdMods}
+  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods, view: quicker.WinViewDict}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
     focus = false,
     min_height = 4,
-    max_height = 10,
+    max_height = 16,
     open_cmd_mods = {},
+    view = {},
   })
+  local clamp = function(val)
+    return util.clamp(opts.min_height, val, opts.max_height)
+  end
   local height
   if opts.loclist then
-    local ok, err = pcall(vim.cmd.lopen, { mods = opts.open_cmd_mods })
+    height = opts.height or clamp(#vim.fn.getloclist(0))
+    local ok, err = pcall(vim.cmd.lopen, {
+      count = height,
+      mods = opts.open_cmd_mods,
+    })
     if not ok then
       vim.notify(err, vim.log.levels.ERROR)
       return
     end
-    height = #vim.fn.getloclist(0)
   else
-    vim.cmd.copen({ mods = opts.open_cmd_mods })
-    height = #vim.fn.getqflist()
+    height = opts.height or clamp(#vim.fn.getqflist())
+    vim.cmd.copen({
+      count = height,
+      mods = opts.open_cmd_mods,
+    })
   end
 
-  -- only set the height if the quickfix is not a full-height vsplit
-  if not util.is_full_height_vsplit(0) then
-    height = math.min(opts.max_height, math.max(opts.min_height, height))
-    vim.api.nvim_win_set_height(0, height)
+  if not vim.tbl_isempty(opts.view) then
+    vim.fn.winrestview(opts.view)
   end
 
   if not opts.focus then

@@ -71,25 +71,12 @@ M.get_lnum_extmarks = function(bufnr, lnum, line_len, ns)
   end, extmarks)
 end
 
----Return true if the window is a full-height leaf window
----@param winid? integer
----@return boolean
-M.is_full_height_vsplit = function(winid)
-  if not winid or winid == 0 then
-    winid = vim.api.nvim_get_current_win()
-  end
-  local layout = vim.fn.winlayout()
-  -- If the top layout is not vsplit, then it's not a vertical leaf
-  if layout[1] ~= "row" then
-    return false
-  end
-  for _, v in ipairs(layout[2]) do
-    if v[1] == "leaf" and v[2] == winid then
-      return true
-    end
-  end
-
-  return false
+---Limit the value to a range between a minimum and maximum
+---@param min integer
+---@param val integer
+---@param max integer
+M.clamp = function(min, val, max)
+  return math.max(min, math.min(val, max))
 end
 
 return M
