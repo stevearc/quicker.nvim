@@ -5,7 +5,9 @@ local util = require("quicker.util")
 
 local M = {}
 
-local EM_QUAD = " "
+-- A EM_QUAD and a space, we include an extra space before the real text, because it
+-- avoids strange cases such as no highlight when insert at start of qf text.
+local EM_QUAD = "  "
 local EM_QUAD_LEN = EM_QUAD:len()
 M.EM_QUAD = EM_QUAD
 M.EM_QUAD_LEN = EM_QUAD_LEN
@@ -267,6 +269,8 @@ local function highlight_buffer_when_entered(qfbufnr, info)
       vim.b[qfbufnr].pending_highlight = nil
       info.start_idx = 1
       info.end_idx = vim.api.nvim_buf_line_count(qfbufnr)
+      info.regions = {}
+      info.empty_regions = {}
       schedule_highlights(info)
     end,
   })
@@ -339,7 +343,22 @@ add_qf_highlights = function(info)
         loaded = true
       end
 
-      if loaded then
+      local ft = vim.filetype.match({ buf = item.bufnr })
+      -- If attach_parser is true, we should not apply lsp highlight or query ts highlights
+      -- from loaded buffers, as they will overwrite each other.
+      if config.highlight.attach_parser and ft then
+        info.regions[ft] = info.regions[ft] or {}
+        info.empty_regions[ft] = info.empty_regions[ft] or {}
+        local filename = vim.split(line, EM_QUAD, { plain = true })[1]
+        table.insert(info.regions[ft], {
+          {
+            i - 1,
+            filename:len() + EM_QUAD_LEN - 1, -- skip EM_QUAD
+            i - 1,
+            #line,
+          },
+        })
+      elseif loaded then
         add_item_highlights_from_buf(qfbufnr, item, line, i)
       elseif config.highlight.treesitter then
         local filename = vim.split(line, EM_QUAD, { plain = true })[1]
@@ -383,6 +402,11 @@ add_qf_highlights = function(info)
       return
     end
   end
+  if config.highlight.attach_parser then
+    -- cleanup previous regions each time we call setqflist.
+    require("quicker.treesitter").attach(qf_list.qfbufnr, info.empty_regions)
+    require("quicker.treesitter").attach(qf_list.qfbufnr, info.regions)
+  end
 
   vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, ns, info.end_idx, -1)
 end
@@ -425,6 +449,8 @@ end
 ---@field id integer
 ---@field start_idx integer
 ---@field end_idx integer
+---@field regions table<string, number[][][]>
+---@field empty_regions table<string, number[][][]>
 ---@field winid integer
 ---@field quickfix 1|0
 ---@field force_bufload? boolean field injected by us to control if we're forcing a bufload for the syntax highlighting
@@ -588,6 +614,8 @@ function M.quickfixtextfunc(info)
 
   -- If we just rendered the last item, add highlights
   if info.end_idx == #items then
+    info.regions = {}
+    info.empty_regions = {}
     schedule_highlights(info)
 
     if qf_list.qfbufnr > 0 then

@@ -198,7 +198,10 @@ require("quicker").setup({
   -- Keep the cursor to the right of the filename and lnum columns
   constrain_cursor = true,
   highlight = {
-    -- Use treesitter highlighting
+    -- Attach parser to qf buffer, highlight text in real time as you edit.
+    -- If this is true, other highlight options are ignored.
+    attach_parser = true,
+    -- Query treesitter highlight groups using string parser, only update after you save or refresh.
     treesitter = true,
     -- Use LSP semantic token highlighting
     lsp = true,

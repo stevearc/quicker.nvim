@@ -154,6 +154,7 @@ end
 ---@field soft_end? string
 
 ---@class (exact) quicker.HighlightConfig
+---@field attach_parser boolean
 ---@field treesitter boolean
 ---@field lsp boolean
 ---@field load_buffers boolean
