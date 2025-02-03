@@ -350,14 +350,30 @@ add_qf_highlights = function(info)
         info.regions[ft] = info.regions[ft] or {}
         info.empty_regions[ft] = info.empty_regions[ft] or {}
         local filename = vim.split(line, EM_QUAD, { plain = true })[1]
-        table.insert(info.regions[ft], {
-          {
-            i - 1,
-            filename:len() + EM_QUAD_LEN - 1, -- skip EM_QUAD
-            i - 1,
-            #line,
-          },
-        })
+
+        -- Note: we must include the new line character, when multiple lines are treated as one
+        -- range, without "\n" causes all the problems, for example:
+        --
+        -- tests/tmp/expand_1.lua ┃ 2┃-- a comment
+        -- tests/tmp/expand_1.lua ┃ 3┃local a = 1
+        --
+        -- The parser will treat this as "-- a commentlocal a = 1".
+        local region = {
+          i - 1,
+          filename:len() + EM_QUAD_LEN - 1, -- skip EM_QUAD but include a space
+          i,
+          0,
+        }
+        info.previous_item = info.previous_item or item
+        if info.previous_item.bufnr == item.bufnr and info.previous_item.lnum == item.lnum - 1 then
+          -- Merge current range with previous one, parse them together.
+          table.insert(info.regions[ft][#info.regions[ft]], region)
+        else
+          table.insert(info.regions[ft], {
+            region,
+          })
+        end
+        info.previous_item = item
       elseif loaded then
         add_item_highlights_from_buf(qfbufnr, item, line, i)
       elseif config.highlight.treesitter then
@@ -451,6 +467,7 @@ end
 ---@field end_idx integer
 ---@field regions table<string, number[][][]>
 ---@field empty_regions table<string, number[][][]>
+---@field previous_item QuickFixItem
 ---@field winid integer
 ---@field quickfix 1|0
 ---@field force_bufload? boolean field injected by us to control if we're forcing a bufload for the syntax highlighting
@@ -496,7 +513,7 @@ function M.quickfixtextfunc(info)
     if user_data.header == "hard" then
       -- Header when expanded QF list
       local pieces = {
-        string.rep(b.strong_header, col_width + 1),
+        string.rep(b.strong_header, col_width + 2),
         b.strong_cross,
         string.rep(b.strong_header, lnum_width),
       }
@@ -511,7 +528,7 @@ function M.quickfixtextfunc(info)
     elseif user_data.header == "soft" then
       -- Soft header when expanded QF list
       local pieces = {
-        string.rep(b.soft_header, col_width + 1),
+        string.rep(b.soft_header, col_width + 2),
         b.soft_cross,
         string.rep(b.soft_header, lnum_width),
       }
