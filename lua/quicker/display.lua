@@ -344,8 +344,6 @@ add_qf_highlights = function(info)
       end
 
       local ft = vim.filetype.match({ buf = item.bufnr })
-      -- If attach_parser is true, we should not apply lsp highlight or query ts highlights
-      -- from loaded buffers, as they will overwrite each other.
       if config.highlight.attach_parser and ft then
         info.regions[ft] = info.regions[ft] or {}
         info.empty_regions[ft] = info.empty_regions[ft] or {}
@@ -374,8 +372,6 @@ add_qf_highlights = function(info)
           })
         end
         info.previous_item = item
-      elseif loaded then
-        add_item_highlights_from_buf(qfbufnr, item, line, i)
       elseif config.highlight.treesitter then
         local filename = vim.split(line, EM_QUAD, { plain = true })[1]
         local offset = filename:len() + EM_QUAD_LEN
@@ -391,6 +387,9 @@ add_qf_highlights = function(info)
             strict = false,
           })
         end
+      end
+      if loaded then
+        add_item_highlights_from_buf(qfbufnr, item, line, i)
       end
     end
 
