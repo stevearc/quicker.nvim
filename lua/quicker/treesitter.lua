@@ -1,4 +1,4 @@
----@alias quicker.LangRegions table<string, number[][][]>
+---@alias quicker.LangRegions table<string, Range4[][]>
 
 local M = {}
 
@@ -58,6 +58,7 @@ end
 
 ---@param buf number
 ---@param lang? string
+---@param regions quicker.LangRegions
 function M._attach_lang(buf, lang, regions)
   lang = lang or "markdown"
   lang = lang == "markdown" and "markdown_inline" or lang
