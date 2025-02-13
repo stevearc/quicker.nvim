@@ -2,17 +2,17 @@
 
 local M = {}
 
-M.cache = {} ---@type table<number, table<string,{parser: vim.treesitter.LanguageTree, highlighter:vim.treesitter.highlighter, enabled:boolean}>>
+local cache = {} ---@type table<number, table<string,{parser: vim.treesitter.LanguageTree, highlighter:vim.treesitter.highlighter, enabled:boolean}>>
 local ns = vim.api.nvim_create_namespace("quicker.treesitter")
 
 local TSHighlighter = vim.treesitter.highlighter
 
 local function wrap(name)
   return function(_, win, buf, ...)
-    if not M.cache[buf] then
+    if not cache[buf] then
       return false
     end
-    for _, hl in pairs(M.cache[buf] or {}) do
+    for _, hl in pairs(cache[buf] or {}) do
       if hl.enabled then
         TSHighlighter.active[buf] = hl.highlighter
         TSHighlighter[name](_, win, buf, ...)
@@ -37,7 +37,7 @@ function M.setup()
   vim.api.nvim_create_autocmd("BufWipeout", {
     group = vim.api.nvim_create_augroup("quicker.treesitter.hl", { clear = true }),
     callback = function(ev)
-      M.cache[ev.buf] = nil
+      cache[ev.buf] = nil
     end,
   })
 end
@@ -46,9 +46,9 @@ end
 ---@param regions quicker.LangRegions
 function M.attach(buf, regions)
   M.setup()
-  M.cache[buf] = M.cache[buf] or {}
-  for lang in pairs(M.cache[buf]) do
-    M.cache[buf][lang].enabled = regions[lang] ~= nil
+  cache[buf] = cache[buf] or {}
+  for lang in pairs(cache[buf]) do
+    cache[buf][lang].enabled = regions[lang] ~= nil
   end
 
   for lang in pairs(regions) do
@@ -63,21 +63,21 @@ function M._attach_lang(buf, lang, regions)
   lang = lang or "markdown"
   lang = lang == "markdown" and "markdown_inline" or lang
 
-  M.cache[buf] = M.cache[buf] or {}
+  cache[buf] = cache[buf] or {}
 
-  if not M.cache[buf][lang] then
+  if not cache[buf][lang] then
     local ok, parser = pcall(vim.treesitter.get_parser, buf, lang)
     if not ok then
       return
     end
     parser:set_included_regions(vim.deepcopy(regions))
-    M.cache[buf][lang] = {
+    cache[buf][lang] = {
       parser = parser,
       highlighter = TSHighlighter.new(parser),
     }
   end
-  M.cache[buf][lang].enabled = true
-  local parser = M.cache[buf][lang].parser
+  cache[buf][lang].enabled = true
+  local parser = cache[buf][lang].parser
 
   parser:set_included_regions(vim.deepcopy(regions))
   -- Run a full parse for all included regions. There are two reasons:
