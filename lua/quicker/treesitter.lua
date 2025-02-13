@@ -34,7 +34,7 @@ function M.setup()
     on_line = wrap("_on_line"),
   })
 
-  vim.api.nvim_create_autocmd("QuickFixCmdPost", {
+  vim.api.nvim_create_autocmd("BufWipeout", {
     group = vim.api.nvim_create_augroup("quicker.treesitter.hl", { clear = true }),
     callback = function(ev)
       M.cache[ev.buf] = nil
