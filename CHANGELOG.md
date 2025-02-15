@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.4.0](https://github.com/stevearc/quicker.nvim/compare/v1.3.0...v1.4.0) (2025-02-12)
+
+
+### Features
+
+* add view option to open(), change handling of height option ([#38](https://github.com/stevearc/quicker.nvim/issues/38)) ([b9b7eec](https://github.com/stevearc/quicker.nvim/commit/b9b7eec8dc56bd653ae342caa5400a4e5ba3529c))
+
+
+### Bug Fixes
+
+* change default highlight.load_buffers to false ([#39](https://github.com/stevearc/quicker.nvim/issues/39)) ([ceff21e](https://github.com/stevearc/quicker.nvim/commit/ceff21e3c715499cd1aba02321fdacaee8250875))
+* don't enforce window height for full-height vsplit quickfix ([049def7](https://github.com/stevearc/quicker.nvim/commit/049def718213d3cdf49fdf29835aded09b3e54a3))
+* hide filename when max_filename_width = 0 ([#36](https://github.com/stevearc/quicker.nvim/issues/36)) ([e4fb0b1](https://github.com/stevearc/quicker.nvim/commit/e4fb0b1862284757561d1d51091cdee907585948))
+* highlights when trim_leading_whitespace = 'all' ([87dae0f](https://github.com/stevearc/quicker.nvim/commit/87dae0f25733b7bd79b600a70ca38040db68ec0b))
+
 ## [1.3.0](https://github.com/stevearc/quicker.nvim/compare/v1.2.0...v1.3.0) (2024-12-24)
 
 
