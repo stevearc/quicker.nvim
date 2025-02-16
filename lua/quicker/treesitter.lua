@@ -93,6 +93,11 @@ function M._attach_lang(buf, lang, regions, register_cbs)
   --    which means it only parses visible areas (the on_win and on_line callback),
   --    so if we modify the buffer, unvisited area's state get unsynced.
   pcall(parser.parse, parser, true)
+  -- Hack: we need to manually perform an edit, otherwise delete an entire line
+  -- will cause all highlights to disappear.
+  vim.api.nvim_buf_call(buf, function()
+    vim.cmd([[norm! "_xu]])
+  end)
 end
 
 return M
