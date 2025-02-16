@@ -1,4 +1,4 @@
----@alias quicker.LangRegions table<string, Range4[][]>
+local config = require("quicker.config")
 
 local M = {}
 
@@ -42,6 +42,8 @@ function M.setup()
   })
 end
 
+---@alias quicker.LangRegions table<string, Range4[][]>
+
 ---@param buf number
 ---@param regions quicker.LangRegions
 function M.attach(buf, regions)
@@ -51,35 +53,40 @@ function M.attach(buf, regions)
     cache[buf][lang].enabled = regions[lang] ~= nil
   end
 
+  local counts = 0
+  for _, region in pairs(regions) do
+    counts = counts + #vim.iter(region):flatten():totable()
+  end
+
   for lang in pairs(regions) do
-    M._attach_lang(buf, lang, regions[lang])
+    M._attach_lang(buf, lang, regions[lang], counts > config.highlight.max_lines)
   end
 end
 
 ---@param buf number
----@param lang? string
+---@param lang string
 ---@param regions quicker.LangRegions
-function M._attach_lang(buf, lang, regions)
-  lang = lang or "markdown"
-  lang = lang == "markdown" and "markdown_inline" or lang
-
+---@param detach boolean
+function M._attach_lang(buf, lang, regions, detach)
   cache[buf] = cache[buf] or {}
 
-  if not cache[buf][lang] then
-    local ok, parser = pcall(vim.treesitter.get_parser, buf, lang)
-    if not ok then
-      return
-    end
-    parser:set_included_regions(vim.deepcopy(regions))
-    cache[buf][lang] = {
-      parser = parser,
-      highlighter = TSHighlighter.new(parser),
-    }
+  local ok, parser
+  if detach then
+    -- This avoids registering callbacks on the languagetree.
+    ok, parser = pcall(vim.treesitter.languagetree.new, buf, lang)
+  else
+    ok, parser = pcall(vim.treesitter.get_parser, buf, lang)
   end
-  cache[buf][lang].enabled = true
-  local parser = cache[buf][lang].parser
-
+  if not ok then
+    return
+  end
   parser:set_included_regions(vim.deepcopy(regions))
+  cache[buf][lang] = {
+    parser = parser,
+    highlighter = TSHighlighter.new(parser),
+  }
+  cache[buf][lang].enabled = true
+
   -- Run a full parse for all included regions. There are two reasons:
   -- 1. When we call `vim.treesitter.get_parser`, we have not set any
   --    injection ranges.

@@ -216,27 +216,6 @@ local function add_item_highlights_from_buf(qfbufnr, item, line, lnum)
       offset = offset - item_space
     end
 
-    -- Add treesitter highlights
-    if config.highlight.treesitter then
-      for _, hl in ipairs(highlight.buf_get_ts_highlights(item.bufnr, item.lnum)) do
-        local start_col, end_col, hl_group = hl[1], hl[2], hl[3]
-        if end_col == -1 then
-          end_col = src_line:len()
-        end
-        -- If the highlight starts at the beginning of the source line, then it might be off the
-        -- buffer in the quickfix because we've removed leading whitespace. If so, clamp the value
-        -- to 0. Except, for some reason 0 gives incorrect results, but -1 works properly even
-        -- though -1 should indicate the *end* of the line. Not sure why this work, but it does.
-        local hl_start = math.max(-1, start_col + offset)
-        vim.api.nvim_buf_set_extmark(qfbufnr, ns, lnum - 1, hl_start, {
-          hl_group = hl_group,
-          end_col = end_col + offset,
-          priority = 100,
-          strict = false,
-        })
-      end
-    end
-
     -- Add LSP semantic token highlights
     if config.highlight.lsp then
       for _, hl in ipairs(highlight.buf_get_lsp_highlights(item.bufnr, item.lnum)) do
@@ -342,7 +321,7 @@ add_qf_highlights = function(info)
       end
 
       local ft = vim.filetype.match({ buf = item.bufnr })
-      if config.highlight.attach_parser and ft then
+      if config.highlight.treesitter and ft then
         info.regions[ft] = info.regions[ft] or {}
         info.empty_regions[ft] = info.empty_regions[ft] or {}
         local filename = vim.split(line, EM_QUAD, { plain = true })[1]
@@ -370,21 +349,6 @@ add_qf_highlights = function(info)
           })
         end
         info.previous_item = item
-      elseif config.highlight.treesitter then
-        local filename = vim.split(line, EM_QUAD, { plain = true })[1]
-        local offset = filename:len() + EM_QUAD_LEN
-        local text = line:sub(offset + 1)
-        for _, hl in ipairs(highlight.get_heuristic_ts_highlights(item, text)) do
-          local start_col, end_col, hl_group = hl[1], hl[2], hl[3]
-          start_col = start_col + offset
-          end_col = end_col + offset
-          vim.api.nvim_buf_set_extmark(qfbufnr, ns, i - 1, start_col, {
-            hl_group = hl_group,
-            end_col = end_col,
-            priority = 100,
-            strict = false,
-          })
-        end
       end
       if loaded then
         add_item_highlights_from_buf(qfbufnr, item, line, i)
@@ -415,7 +379,7 @@ add_qf_highlights = function(info)
       return
     end
   end
-  if config.highlight.attach_parser then
+  if config.highlight.treesitter then
     -- cleanup previous regions each time we call setqflist.
     require("quicker.treesitter").attach(qf_list.qfbufnr, info.empty_regions)
     require("quicker.treesitter").attach(qf_list.qfbufnr, info.regions)

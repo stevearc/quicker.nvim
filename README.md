@@ -198,11 +198,11 @@ require("quicker").setup({
   -- Keep the cursor to the right of the filename and lnum columns
   constrain_cursor = true,
   highlight = {
-    -- Attach parser to qf buffer, highlight text in real time as you edit.
-    attach_parser = true,
-    -- Additionally query treesitter highlight groups using string parser,
-    -- those highlights only update when you save or refresh.
+    -- Attach treesitter parser to qf buffer, highlight text in real time as you edit.
     treesitter = true,
+    -- Do not register callbacks when buffer line counts exceed this limit. In other words,
+    -- highlight won't get updated as you edit.
+    max_lines = 10000,
     -- Use LSP semantic token highlighting
     lsp = true,
     -- Load the referenced buffers to apply more accurate highlights (may be slow)
