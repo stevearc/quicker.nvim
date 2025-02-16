@@ -248,6 +248,7 @@ local function highlight_buffer_when_entered(qfbufnr, info)
       info.end_idx = vim.api.nvim_buf_line_count(qfbufnr)
       info.regions = {}
       info.empty_regions = {}
+      info.ft = {}
       schedule_highlights(info)
     end,
   })
@@ -320,7 +321,12 @@ add_qf_highlights = function(info)
         loaded = true
       end
 
-      local ft = vim.filetype.match({ buf = item.bufnr })
+      local ft = info.ft[item.bufnr]
+      if ft == nil then
+        ft = loaded and vim.bo[item.bufnr].filetype or vim.filetype.match({ buf = item.bufnr })
+        info.ft[item.bufnr] = ft
+      end
+
       if config.highlight.treesitter and ft then
         info.regions[ft] = info.regions[ft] or {}
         info.empty_regions[ft] = info.empty_regions[ft] or {}
@@ -428,6 +434,7 @@ end
 ---@field end_idx integer
 ---@field regions table<string, Range4[][]>
 ---@field empty_regions table<string, Range4[][]>
+---@field ft table<integer, string|nil>
 ---@field previous_item QuickFixItem
 ---@field winid integer
 ---@field quickfix 1|0
@@ -594,6 +601,7 @@ function M.quickfixtextfunc(info)
   if info.end_idx == #items then
     info.regions = {}
     info.empty_regions = {}
+    info.ft = {}
     schedule_highlights(info)
 
     if qf_list.qfbufnr > 0 then
