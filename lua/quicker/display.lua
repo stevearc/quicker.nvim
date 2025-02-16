@@ -462,8 +462,8 @@ end
 ---@field id integer
 ---@field start_idx integer
 ---@field end_idx integer
----@field regions table<string, number[][][]>
----@field empty_regions table<string, number[][][]>
+---@field regions table<string, Range4[][]>
+---@field empty_regions table<string, Range4[][]>
 ---@field previous_item QuickFixItem
 ---@field winid integer
 ---@field quickfix 1|0
