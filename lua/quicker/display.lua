@@ -247,6 +247,7 @@ local function highlight_buffer_when_entered(qfbufnr, info)
       info.start_idx = 1
       info.end_idx = vim.api.nvim_buf_line_count(qfbufnr)
       info.regions = {}
+      info.region_count = 0
       info.empty_regions = {}
       info.ft = {}
       schedule_highlights(info)
@@ -329,6 +330,7 @@ add_qf_highlights = function(info)
 
       if config.highlight.treesitter and ft then
         info.regions[ft] = info.regions[ft] or {}
+        info.region_count = info.region_count + 1
         info.empty_regions[ft] = info.empty_regions[ft] or {}
         local filename = vim.split(line, EM_QUAD, { plain = true })[1]
 
@@ -386,9 +388,10 @@ add_qf_highlights = function(info)
     end
   end
   if config.highlight.treesitter then
+    local register_cbs = info.region_count <= config.highlight.max_lines
     -- cleanup previous regions each time we call setqflist.
-    require("quicker.treesitter").attach(qf_list.qfbufnr, info.empty_regions)
-    require("quicker.treesitter").attach(qf_list.qfbufnr, info.regions)
+    require("quicker.treesitter").attach(qf_list.qfbufnr, info.empty_regions, register_cbs)
+    require("quicker.treesitter").attach(qf_list.qfbufnr, info.regions, register_cbs)
   end
 
   vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, ns, info.end_idx, -1)
@@ -433,6 +436,7 @@ end
 ---@field start_idx integer
 ---@field end_idx integer
 ---@field regions table<string, Range4[][]>
+---@field region_count integer
 ---@field empty_regions table<string, Range4[][]>
 ---@field ft table<integer, string|nil>
 ---@field previous_item QuickFixItem
@@ -600,6 +604,7 @@ function M.quickfixtextfunc(info)
   -- If we just rendered the last item, add highlights
   if info.end_idx == #items then
     info.regions = {}
+    info.region_count = 0
     info.empty_regions = {}
     info.ft = {}
     schedule_highlights(info)
