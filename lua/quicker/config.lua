@@ -3,6 +3,7 @@ local default_config = {
   opts = {
     buflisted = false,
     number = false,
+    concealcursor = "nvic",
     relativenumber = false,
     signcolumn = "auto",
     winfixheight = true,

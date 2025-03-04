@@ -487,7 +487,7 @@ function M.quickfixtextfunc(info)
     if user_data.header == "hard" then
       -- Header when expanded QF list
       local pieces = {
-        string.rep(b.strong_header, col_width + 2),
+        string.rep(b.strong_header, col_width + 1),
         b.strong_cross,
         string.rep(b.strong_header, lnum_width),
       }
@@ -502,7 +502,7 @@ function M.quickfixtextfunc(info)
     elseif user_data.header == "soft" then
       -- Soft header when expanded QF list
       local pieces = {
-        string.rep(b.soft_header, col_width + 2),
+        string.rep(b.soft_header, col_width + 1),
         b.soft_cross,
         string.rep(b.soft_header, lnum_width),
       }
@@ -578,6 +578,10 @@ function M.quickfixtextfunc(info)
             virt_text_pos = "inline",
             invalidate = true,
           })
+        vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, ns, lnum - 1, end_col, {
+          end_col = end_col + EM_QUAD_LEN - 1,
+          conceal = "",
+        })
         idmap[id] = lnum
 
         -- Highlight the filename
@@ -598,6 +602,10 @@ function M.quickfixtextfunc(info)
           virt_lines = { header },
           virt_lines_above = true,
         })
+        -- vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, ns, lnum - 1, end_col, {
+        --   end_col = end_col + EM_QUAD_LEN - 1,
+        --   conceal = "",
+        -- })
       end
     end
   end
