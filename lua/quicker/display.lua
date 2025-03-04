@@ -5,7 +5,9 @@ local util = require("quicker.util")
 
 local M = {}
 
-local EM_QUAD = " "
+-- A EM_QUAD and a space, we include an extra space before the real text, because it
+-- avoids strange cases such as no highlight when insert at start of qf text.
+local EM_QUAD = "  "
 local EM_QUAD_LEN = EM_QUAD:len()
 M.EM_QUAD = EM_QUAD
 M.EM_QUAD_LEN = EM_QUAD_LEN
@@ -343,7 +345,7 @@ add_qf_highlights = function(info)
         -- The parser will treat this as "-- a commentlocal a = 1".
         local region = {
           i - 1,
-          filename:len() + EM_QUAD_LEN,
+          filename:len() + EM_QUAD_LEN - 1, -- skip EM_QUAD but include a space
           i,
           0,
         }
@@ -485,7 +487,7 @@ function M.quickfixtextfunc(info)
     if user_data.header == "hard" then
       -- Header when expanded QF list
       local pieces = {
-        string.rep(b.strong_header, col_width + 1),
+        string.rep(b.strong_header, col_width + 2),
         b.strong_cross,
         string.rep(b.strong_header, lnum_width),
       }
@@ -500,7 +502,7 @@ function M.quickfixtextfunc(info)
     elseif user_data.header == "soft" then
       -- Soft header when expanded QF list
       local pieces = {
-        string.rep(b.soft_header, col_width + 1),
+        string.rep(b.soft_header, col_width + 2),
         b.soft_cross,
         string.rep(b.soft_header, lnum_width),
       }
