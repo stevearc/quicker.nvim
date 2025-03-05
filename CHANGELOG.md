@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.0](https://github.com/stevearc/quicker.nvim/compare/v1.4.0...v1.5.0) (2025-03-05)
+
+
+### Features
+
+* add QuickFixTextInvalid highlight group ([#44](https://github.com/stevearc/quicker.nvim/issues/44)) ([1798be7](https://github.com/stevearc/quicker.nvim/commit/1798be71cdcb15fb84fa8054148a56e17fd391dc))
+
 ## [1.4.0](https://github.com/stevearc/quicker.nvim/compare/v1.3.0...v1.4.0) (2025-02-12)
 
 
