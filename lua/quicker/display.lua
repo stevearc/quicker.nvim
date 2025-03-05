@@ -571,6 +571,22 @@ function M.quickfixtextfunc(info)
           priority = 100,
           invalidate = true,
         })
+
+        -- If the entry is invalid, change the text to be QuickFixTextInvalid
+        if invalid_filenames[i] then
+          vim.api.nvim_buf_set_extmark(
+            qf_list.qfbufnr,
+            filename_ns,
+            lnum - 1,
+            end_col + EM_QUAD_LEN - 1,
+            {
+              hl_group = "QuickFixTextInvalid",
+              end_col = lines[i]:len(),
+              priority = 100,
+              invalidate = true,
+            }
+          )
+        end
       end
       vim.b[qf_list.qfbufnr].qf_ext_id_to_item_idx = idmap
 

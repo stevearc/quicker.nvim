@@ -217,6 +217,9 @@ function M.set_highlight_groups()
   if vim.tbl_isempty(vim.api.nvim_get_hl(0, { name = "QuickFixLineNr" })) then
     vim.api.nvim_set_hl(0, "QuickFixLineNr", { link = "LineNr", default = true })
   end
+  if vim.tbl_isempty(vim.api.nvim_get_hl(0, { name = "QuickFixTextInvalid" })) then
+    vim.api.nvim_set_hl(0, "QuickFixTextInvalid", { link = "QuickFixText", default = true })
+  end
 end
 
 return M

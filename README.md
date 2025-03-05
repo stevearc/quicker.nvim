@@ -250,13 +250,15 @@ These are the highlight groups that are used to style the quickfix buffer. You c
 highlight groups yourself or use `:help winhighlight` in the setup `opts` option to override them
 for just the quickfix window.
 
-- `QuickFixHeaderHard` - Used for the header that divides results from different files
-- `QuickFixHeaderSoft` - Used for the header that divides results within the same file
-- `Delimiter` - Used for the divider between filename, line number, and text
-- `QuickFixLineNr` - Used for the line number
-- `QuickFixFilename` - Used for the filename
-- `QuickFixFilenameInvalid` - Used for the filename when `valid = 0`
-- `DiagnosticSign*` - Used for the signs that display the quickfix error type
+- `QuickFixText` - The base text when there are no syntax highlights
+- `QuickFixTextInvalid` - The text when `valid = 0`
+- `QuickFixHeaderHard` - The header that divides results from different files (with context expanded)
+- `QuickFixHeaderSoft` - The header that divides results within the same file (with context expanded)
+- `Delimiter` - The divider between filename, line number, and text
+- `QuickFixLineNr` - The line number
+- `QuickFixFilename` - The filename
+- `QuickFixFilenameInvalid` - The filename when `valid = 0`
+- `DiagnosticSign*` - The signs that display the quickfix error type
 
 ## API
 
