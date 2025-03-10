@@ -3,6 +3,7 @@ local default_config = {
   opts = {
     buflisted = false,
     number = false,
+    concealcursor = "nvic",
     relativenumber = false,
     signcolumn = "auto",
     winfixheight = true,
@@ -26,8 +27,11 @@ local default_config = {
   -- Keep the cursor to the right of the filename and lnum columns
   constrain_cursor = true,
   highlight = {
-    -- Use treesitter highlighting
+    -- Attach treesitter parser to qf buffer, highlight text in real time as you edit.
     treesitter = true,
+    -- Do not register callbacks when buffer line counts exceed this limit. In other words,
+    -- highlight won't get updated as you edit.
+    max_lines = 10000,
     -- Use LSP semantic token highlighting
     lsp = true,
     -- Load the referenced buffers to apply more accurate highlights (may be slow)
@@ -155,6 +159,7 @@ end
 
 ---@class (exact) quicker.HighlightConfig
 ---@field treesitter boolean
+---@field max_lines integer
 ---@field lsp boolean
 ---@field load_buffers boolean
 
