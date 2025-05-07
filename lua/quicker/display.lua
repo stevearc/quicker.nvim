@@ -141,7 +141,7 @@ local function do_next_highlight()
   if next_info then
     local ok, err = xpcall(add_qf_highlights, debug.traceback, next_info)
     if not ok then
-      vim.api.nvim_err_writeln(err)
+      vim.api.nvim_echo({ { err } }, true, { err = true })
     end
   else
     _running = false
