@@ -6,13 +6,19 @@ local function setup(opts)
   config.setup(opts)
 
   local aug = vim.api.nvim_create_augroup("quicker", { clear = true })
+  local aug_opts = vim.api.nvim_create_augroup("quicker_opts", { clear = false })
+  local aug_cursor = vim.api.nvim_create_augroup("quicker_cursor", { clear = false })
+  local aug_editor = vim.api.nvim_create_augroup("quicker_editor", { clear = false })
   vim.api.nvim_create_autocmd("FileType", {
     pattern = "qf",
     group = aug,
     desc = "quicker.nvim set up quickfix mappings",
     callback = function(args)
+      vim.api.nvim_clear_autocmds({ group = aug_opts, buffer = args.buf })
+      vim.api.nvim_clear_autocmds({ group = aug_cursor, buffer = args.buf })
+
       require("quicker.highlight").set_highlight_groups()
-      require("quicker.opts").set_opts(args.buf)
+      require("quicker.opts").set_opts(args.buf, aug_opts)
       require("quicker.keys").set_keymaps(args.buf)
       vim.api.nvim_buf_create_user_command(args.buf, "Refresh", function()
         require("quicker.context").refresh()
@@ -21,7 +27,7 @@ local function setup(opts)
       })
 
       if config.constrain_cursor then
-        require("quicker.cursor").constrain_cursor(args.buf)
+        require("quicker.cursor").constrain_cursor(args.buf, aug_cursor)
       end
 
       config.on_qf(args.buf)
@@ -41,7 +47,8 @@ local function setup(opts)
       group = aug,
       desc = "quicker.nvim set up quickfix editing",
       callback = function(args)
-        require("quicker.editor").setup_editor(args.buf)
+        vim.api.nvim_clear_autocmds({ group = aug_editor, buffer = args.buf })
+        require("quicker.editor").setup_editor(args.buf, aug_editor)
       end,
     })
   end
