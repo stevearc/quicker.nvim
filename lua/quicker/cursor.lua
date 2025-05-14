@@ -22,6 +22,9 @@ function M.constrain_cursor(bufnr, aug)
     if not vim.api.nvim_buf_is_valid(bufnr) then
       return
     end
+    if vim.api.nvim_get_current_buf() == bufnr then
+      constrain_cursor()
+    end
     vim.api.nvim_create_autocmd("InsertEnter", {
       desc = "Constrain quickfix cursor position",
       group = aug,
