@@ -36,13 +36,13 @@ local function set_win_opts(winid)
 end
 
 ---@param bufnr integer
-function M.set_opts(bufnr)
+---@param aug integer
+function M.set_opts(bufnr, aug)
   set_buf_opts(bufnr)
   local winid = util.buf_find_win(bufnr)
   if winid then
     set_win_opts(winid)
   else
-    local aug = vim.api.nvim_create_augroup("quicker", { clear = false })
     vim.api.nvim_create_autocmd("BufWinEnter", {
       desc = "Set quickfix window options",
       buffer = bufnr,

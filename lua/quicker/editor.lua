@@ -373,8 +373,8 @@ end
 -- TODO add support for undo past last change
 
 ---@param bufnr integer
-function M.setup_editor(bufnr)
-  local aug = vim.api.nvim_create_augroup("quicker", { clear = false })
+---@param aug integer
+function M.setup_editor(bufnr, aug)
   local loclist_win
   vim.api.nvim_buf_call(bufnr, function()
     local ok, qf = pcall(vim.fn.getloclist, 0, { filewinid = 0 })

@@ -14,14 +14,17 @@ local function constrain_cursor()
   end
 end
 
----@param bufnr number
-function M.constrain_cursor(bufnr)
+---@param bufnr integer
+---@param aug integer
+function M.constrain_cursor(bufnr, aug)
   -- HACK: we have to defer this call because sometimes the autocmds don't take effect.
   vim.schedule(function()
     if not vim.api.nvim_buf_is_valid(bufnr) then
       return
     end
-    local aug = vim.api.nvim_create_augroup("quicker", { clear = false })
+    if vim.api.nvim_get_current_buf() == bufnr then
+      constrain_cursor()
+    end
     vim.api.nvim_create_autocmd("InsertEnter", {
       desc = "Constrain quickfix cursor position",
       group = aug,
