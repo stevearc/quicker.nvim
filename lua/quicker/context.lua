@@ -1,3 +1,4 @@
+local FileCache = require("quicker.filecache")
 local util = require("quicker.util")
 
 local M = {}
@@ -281,20 +282,16 @@ function M.refresh(loclist_win, opts)
   end
 
   local items = {}
+  local filecache = FileCache.new(qf_list.items)
   for _, item in ipairs(qf_list.items) do
-    if item.bufnr ~= 0 and item.lnum ~= 0 then
-      if not vim.api.nvim_buf_is_loaded(item.bufnr) then
-        vim.fn.bufload(item.bufnr)
+    local line = filecache:get_line(item.bufnr, item.lnum)
+    if line then
+      if opts.keep_diagnostics then
+        update_item_text_keep_diagnostics(item, line)
+      else
+        item.text = line
       end
-      local line = vim.api.nvim_buf_get_lines(item.bufnr, item.lnum - 1, item.lnum, false)[1]
-      if line then
-        if opts.keep_diagnostics then
-          update_item_text_keep_diagnostics(item, line)
-        else
-          item.text = line
-        end
-        table.insert(items, item)
-      end
+      table.insert(items, item)
     else
       table.insert(items, item)
     end
