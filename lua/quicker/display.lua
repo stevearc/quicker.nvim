@@ -554,14 +554,18 @@ function M.quickfixtextfunc(info)
       for i, loc in ipairs(locations) do
         local end_col = lines[i]:find(EM_QUAD, 1, true) or col_width
         local lnum = start_idx + i - 1
-        local id =
-          vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, ns, lnum - 1, end_col + EM_QUAD_LEN - 1, {
-            right_gravity = false,
-            virt_text = loc,
-            virt_text_pos = "inline",
-            invalidate = true,
-          })
-        idmap[id] = lnum
+        local col = end_col + EM_QUAD_LEN - 1
+        local line_len = #lines[i]
+        if col >= 0 and col <= line_len then
+          local id =
+            vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, ns, lnum - 1, col, {
+              right_gravity = false,
+              virt_text = loc,
+              virt_text_pos = "inline",
+              invalidate = true,
+            })
+          idmap[id] = lnum
+        end
 
         -- Highlight the filename
         vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, filename_ns, lnum - 1, 0, {
