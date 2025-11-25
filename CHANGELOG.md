@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.5.0](https://github.com/stevearc/quicker.nvim/compare/v1.4.0...v1.5.0) (2025-11-25)
+
+
+### Features
+
+* add QuickFixTextInvalid highlight group ([#44](https://github.com/stevearc/quicker.nvim/issues/44)) ([1798be7](https://github.com/stevearc/quicker.nvim/commit/1798be71cdcb15fb84fa8054148a56e17fd391dc))
+
+
+### Bug Fixes
+
+* defer lazy loading hack ([191b487](https://github.com/stevearc/quicker.nvim/commit/191b487d3e915389e9f0e6e3e5c19746d5b71bf2))
+* potential infinite loop for inconsistent buffer state ([9983d4b](https://github.com/stevearc/quicker.nvim/commit/9983d4b28881e1df626e3682167b45c284d4da8c))
+* prevent adding duplicate events for the same buffer ([#57](https://github.com/stevearc/quicker.nvim/issues/57)) ([51d3926](https://github.com/stevearc/quicker.nvim/commit/51d3926f183c2d98fbc237cc237ae0926839af3a))
+* replace deprecated nvim_err_writeln with nvim_echo ([7349ca2](https://github.com/stevearc/quicker.nvim/commit/7349ca233d3238ab8e19a3d197f9c9438af52e96))
+
+
+### Performance Improvements
+
+* speed up :Refresh for large quickfix lists ([38177c7](https://github.com/stevearc/quicker.nvim/commit/38177c7eaaab92bcd07698badcf315239d3ec161))
+* speed up save for large quickfix lists ([6b88ca4](https://github.com/stevearc/quicker.nvim/commit/6b88ca4d70e35df877d9564beba83f00ba0c3133))
+
 ## [1.4.0](https://github.com/stevearc/quicker.nvim/compare/v1.3.0...v1.4.0) (2025-02-12)
 
 
