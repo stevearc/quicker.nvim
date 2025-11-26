@@ -532,13 +532,17 @@ function M.quickfixtextfunc(info)
   -- Render the filename+lnum and the headers as virtual text
   local start_idx = info.start_idx
   local set_virt_text
+  local attempts = 0
   set_virt_text = function()
     qf_list = load_qf(info)
     if qf_list.qfbufnr > 0 then
       -- Sometimes the buffer is not fully populated yet. If so, we should try again later.
       local num_lines = vim.api.nvim_buf_line_count(qf_list.qfbufnr)
       if num_lines < info.end_idx then
-        vim.schedule(set_virt_text)
+        if attempts < 5 then
+          vim.defer_fn(set_virt_text, 10 * math.pow(2, attempts))
+          attempts = attempts + 1
+        end
         return
       end
 
