@@ -173,7 +173,12 @@ local function save_changes(bufnr, loclist_win)
   local exit_early = false
   local prefixes = load_qf_prefixes(bufnr)
   local ext_id_to_item_idx = vim.b[bufnr].qf_ext_id_to_item_idx
-  for i, line in ipairs(lines) do
+
+  -- Check if all items have been deleted (empty buffer)
+  local is_empty_buffer = #lines == 0 or (#lines == 1 and lines[1] == "")
+
+  if not is_empty_buffer then
+    for i, line in ipairs(lines) do
     (function()
       local extmarks = util.get_lnum_extmarks(bufnr, i, line:len())
       assert(#extmarks <= 1, string.format("Found more than one extmark on line %d", i))
@@ -260,6 +265,7 @@ local function save_changes(bufnr, loclist_win)
         vim.bo[bufnr].modified = true
       end)
       return
+    end
     end
   end
 
