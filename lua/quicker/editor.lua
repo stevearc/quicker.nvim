@@ -179,93 +179,93 @@ local function save_changes(bufnr, loclist_win)
 
   if not is_empty_buffer then
     for i, line in ipairs(lines) do
-    (function()
-      local extmarks = util.get_lnum_extmarks(bufnr, i, line:len())
-      assert(#extmarks <= 1, string.format("Found more than one extmark on line %d", i))
-      local found_idx
-      if extmarks[1] then
-        found_idx = ext_id_to_item_idx[extmarks[1][1]]
-      end
-
-      -- If we didn't find a match, the line was most likely added or reordered
-      if not found_idx then
-        add_qf_error(
-          bufnr,
-          i,
-          "quicker.nvim does not support adding or reordering quickfix items",
-          "DiagnosticError"
-        )
-        if winid then
-          vim.api.nvim_win_set_cursor(winid, { i, 0 })
-        end
-        exit_early = true
-        return
-      end
-
-      -- Trim the filename off of the line
-      local idx = string.find(line, display.EM_QUAD, 1, true)
-      if not idx then
-        add_qf_error(
-          bufnr,
-          i,
-          "The delimiter between filename and text has been deleted. Undo, delete line, or :Refresh.",
-          "DiagnosticError"
-        )
-        if winid then
-          vim.api.nvim_win_set_cursor(winid, { i, 0 })
-        end
-        exit_early = true
-        return
-      end
-      local text = line:sub(idx + display.EM_QUAD_LEN)
-
-      local item = qf_list.items[found_idx]
-      if item.bufnr ~= 0 and item.lnum ~= 0 then
-        local src_line = filecache:get_line(item.bufnr, item.lnum)
-
-        -- add the whitespace prefix back to the parsed line text
-        if config.trim_leading_whitespace == "common" then
-          text = (prefixes[item.bufnr] or "") .. text
-        elseif config.trim_leading_whitespace == "all" and src_line then
-          text = src_line:match("^%s*") .. text
+      (function()
+        local extmarks = util.get_lnum_extmarks(bufnr, i, line:len())
+        assert(#extmarks <= 1, string.format("Found more than one extmark on line %d", i))
+        local found_idx
+        if extmarks[1] then
+          found_idx = ext_id_to_item_idx[extmarks[1][1]]
         end
 
-        if src_line and text ~= src_line then
-          if text:gsub("^%s*", "") == src_line:gsub("^%s*", "") then
-            -- If they only disagree in their leading whitespace, just take the changes after the
-            -- whitespace and assume that the whitespace hasn't changed
-            text = src_line:match("^%s*") .. text:gsub("^%s*", "")
+        -- If we didn't find a match, the line was most likely added or reordered
+        if not found_idx then
+          add_qf_error(
+            bufnr,
+            i,
+            "quicker.nvim does not support adding or reordering quickfix items",
+            "DiagnosticError"
+          )
+          if winid then
+            vim.api.nvim_win_set_cursor(winid, { i, 0 })
           end
-        end
-
-        local text_edit, err = get_text_edit(item, text, src_line)
-        if text_edit then
-          local chng_err = add_change(item.bufnr, text_edit)
-          if chng_err then
-            add_qf_error(bufnr, i, chng_err, "DiagnosticError")
-            if winid then
-              vim.api.nvim_win_set_cursor(winid, { i, 0 })
-            end
-            exit_early = true
-            return
-          end
-        elseif err then
-          table.insert(new_items, item)
-          errors[#new_items] = line
+          exit_early = true
           return
         end
-      end
 
-      -- add item to future qflist
-      item.text = text
-      table.insert(new_items, item)
-    end)()
-    if exit_early then
-      vim.schedule(function()
-        vim.bo[bufnr].modified = true
-      end)
-      return
-    end
+        -- Trim the filename off of the line
+        local idx = string.find(line, display.EM_QUAD, 1, true)
+        if not idx then
+          add_qf_error(
+            bufnr,
+            i,
+            "The delimiter between filename and text has been deleted. Undo, delete line, or :Refresh.",
+            "DiagnosticError"
+          )
+          if winid then
+            vim.api.nvim_win_set_cursor(winid, { i, 0 })
+          end
+          exit_early = true
+          return
+        end
+        local text = line:sub(idx + display.EM_QUAD_LEN)
+
+        local item = qf_list.items[found_idx]
+        if item.bufnr ~= 0 and item.lnum ~= 0 then
+          local src_line = filecache:get_line(item.bufnr, item.lnum)
+
+          -- add the whitespace prefix back to the parsed line text
+          if config.trim_leading_whitespace == "common" then
+            text = (prefixes[item.bufnr] or "") .. text
+          elseif config.trim_leading_whitespace == "all" and src_line then
+            text = src_line:match("^%s*") .. text
+          end
+
+          if src_line and text ~= src_line then
+            if text:gsub("^%s*", "") == src_line:gsub("^%s*", "") then
+              -- If they only disagree in their leading whitespace, just take the changes after the
+              -- whitespace and assume that the whitespace hasn't changed
+              text = src_line:match("^%s*") .. text:gsub("^%s*", "")
+            end
+          end
+
+          local text_edit, err = get_text_edit(item, text, src_line)
+          if text_edit then
+            local chng_err = add_change(item.bufnr, text_edit)
+            if chng_err then
+              add_qf_error(bufnr, i, chng_err, "DiagnosticError")
+              if winid then
+                vim.api.nvim_win_set_cursor(winid, { i, 0 })
+              end
+              exit_early = true
+              return
+            end
+          elseif err then
+            table.insert(new_items, item)
+            errors[#new_items] = line
+            return
+          end
+        end
+
+        -- add item to future qflist
+        item.text = text
+        table.insert(new_items, item)
+      end)()
+      if exit_early then
+        vim.schedule(function()
+          vim.bo[bufnr].modified = true
+        end)
+        return
+      end
     end
   end
 
