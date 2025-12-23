@@ -207,6 +207,51 @@ describe("editor", function()
     }, vim.fn.getqflist())
   end)
 
+  it("handles deleting all lines (clears quickfix)", function()
+    local bufnr = vim.fn.bufadd(test_util.make_tmp_file("edit_delete_all.txt", 10))
+    vim.fn.bufload(bufnr)
+    vim.fn.setqflist({
+      {
+        bufnr = bufnr,
+        text = "line 2",
+        lnum = 2,
+      },
+      {
+        bufnr = bufnr,
+        text = "line 3",
+        lnum = 3,
+      },
+    })
+    vim.cmd.copen()
+    wait_virt_text()
+
+    -- Delete all lines
+    del_line(1)
+    del_line(1)
+
+    vim.cmd.write()
+    assert.are.same({}, vim.fn.getqflist())
+  end)
+
+  it("handles deleting all lines from loclist", function()
+    vim.cmd.edit({ args = { test_util.make_tmp_file("edit_delete_all_ll.txt", 10) } })
+    local bufnr = vim.api.nvim_get_current_buf()
+    vim.fn.setloclist(0, {
+      {
+        bufnr = bufnr,
+        text = "line 2",
+        lnum = 2,
+      },
+    })
+    vim.cmd.lopen()
+    wait_virt_text()
+
+    del_line(1)
+    vim.cmd.write()
+
+    assert.are.same({}, vim.fn.getloclist(0))
+  end)
+
   it("handles loclist", function()
     vim.cmd.edit({ args = { test_util.make_tmp_file("edit_ll.txt", 10) } })
     local bufnr = vim.api.nvim_get_current_buf()

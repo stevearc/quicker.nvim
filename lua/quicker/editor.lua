@@ -173,6 +173,13 @@ local function save_changes(bufnr, loclist_win)
   local exit_early = false
   local prefixes = load_qf_prefixes(bufnr)
   local ext_id_to_item_idx = vim.b[bufnr].qf_ext_id_to_item_idx
+
+  -- Special case: if all lines are deleted, nvim_buf_get_lines will return a list with one empty
+  -- string. We should convert that to an empty list
+  if #lines == 1 and lines[1] == "" then
+    lines = {}
+  end
+
   for i, line in ipairs(lines) do
     (function()
       local extmarks = util.get_lnum_extmarks(bufnr, i, line:len())
