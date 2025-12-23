@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - "stevearc-*"
   pull_request:
     branches:
       - master
@@ -11,7 +12,7 @@ on:
 jobs:
   luacheck:
     name: Luacheck
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -27,7 +28,7 @@ jobs:
 
   typecheck:
     name: typecheck
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - uses: stevearc/nvim-typecheck-action@v2
@@ -36,25 +37,25 @@ jobs:
 
   stylua:
     name: StyLua
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
       - name: Stylua
         uses: JohnnyMorganz/stylua-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          version: v2.0.2
+          version: v2.3.1
           args: --check lua tests
 
   run_tests:
     strategy:
       matrix:
         include:
-          - nvim_tag: v0.10.1
           - nvim_tag: v0.10.4
+          - nvim_tag: v0.11.5
 
     name: Run tests
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     env:
       NVIM_TAG: ${{ matrix.nvim_tag }}
     steps:
@@ -70,7 +71,7 @@ jobs:
 
   update_docs:
     name: Update docs
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
 
@@ -107,7 +108,7 @@ jobs:
       - typecheck
       - run_tests
       - update_docs
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-24.04
     steps:
       - uses: googleapis/release-please-action@v4
         id: release
