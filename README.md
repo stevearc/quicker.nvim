@@ -160,9 +160,33 @@ require("quicker").setup({
       end,
       desc = "Collapse quickfix context",
     },
+    {
+      "f",
+      function()
+        vim.ui.input({ prompt = "Filter pattern: " }, function(pattern)
+          if pattern and pattern ~= "" then
+            vim.cmd("Cfilter " .. pattern)
+          end
+        end)
+      end,
+      desc = "Filter quickfix entries",
+    },
+    {
+      "F",
+      function()
+        vim.ui.input({ prompt = "Filter pattern (inverted): " }, function(pattern)
+          if pattern and pattern ~= "" then
+            vim.cmd("Cfilter! " .. pattern)
+          end
+        end)
+      end,
+      desc = "Filter quickfix entries (inverted)",
+    }
   },
 })
 ```
+
+**Note:** The `:Cfilter` and `:Cfilter!` commands require the `cfilter` plugin. Load it with `vim.cmd("packadd cfilter")` in your config or through your plugin manager.
 
 ## Options
 
