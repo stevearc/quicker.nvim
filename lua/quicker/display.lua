@@ -5,7 +5,9 @@ local util = require("quicker.util")
 
 local M = {}
 
-local EM_QUAD = " "
+-- A EM_QUAD and a space, we include an extra space before the real text, because it
+-- avoids strange cases such as no highlight when insert at start of qf text.
+local EM_QUAD = "  "
 local EM_QUAD_LEN = EM_QUAD:len()
 M.EM_QUAD = EM_QUAD
 M.EM_QUAD_LEN = EM_QUAD_LEN
@@ -216,27 +218,6 @@ local function add_item_highlights_from_buf(qfbufnr, item, line, lnum)
       offset = offset - item_space
     end
 
-    -- Add treesitter highlights
-    if config.highlight.treesitter then
-      for _, hl in ipairs(highlight.buf_get_ts_highlights(item.bufnr, item.lnum)) do
-        local start_col, end_col, hl_group = hl[1], hl[2], hl[3]
-        if end_col == -1 then
-          end_col = src_line:len()
-        end
-        -- If the highlight starts at the beginning of the source line, then it might be off the
-        -- buffer in the quickfix because we've removed leading whitespace. If so, clamp the value
-        -- to 0. Except, for some reason 0 gives incorrect results, but -1 works properly even
-        -- though -1 should indicate the *end* of the line. Not sure why this work, but it does.
-        local hl_start = math.max(-1, start_col + offset)
-        vim.api.nvim_buf_set_extmark(qfbufnr, ns, lnum - 1, hl_start, {
-          hl_group = hl_group,
-          end_col = end_col + offset,
-          priority = 100,
-          strict = false,
-        })
-      end
-    end
-
     -- Add LSP semantic token highlights
     if config.highlight.lsp then
       for _, hl in ipairs(highlight.buf_get_lsp_highlights(item.bufnr, item.lnum)) do
@@ -267,6 +248,10 @@ local function highlight_buffer_when_entered(qfbufnr, info)
       vim.b[qfbufnr].pending_highlight = nil
       info.start_idx = 1
       info.end_idx = vim.api.nvim_buf_line_count(qfbufnr)
+      info.regions = {}
+      info.region_count = 0
+      info.empty_regions = {}
+      info.ft = {}
       schedule_highlights(info)
     end,
   })
@@ -339,23 +324,44 @@ add_qf_highlights = function(info)
         loaded = true
       end
 
-      if loaded then
-        add_item_highlights_from_buf(qfbufnr, item, line, i)
-      elseif config.highlight.treesitter then
+      local ft = info.ft[item.bufnr]
+      if ft == nil then
+        ft = loaded and vim.bo[item.bufnr].filetype or vim.filetype.match({ buf = item.bufnr })
+        info.ft[item.bufnr] = ft
+      end
+
+      if config.highlight.treesitter and ft then
+        info.regions[ft] = info.regions[ft] or {}
+        info.region_count = info.region_count + 1
+        info.empty_regions[ft] = info.empty_regions[ft] or {}
         local filename = vim.split(line, EM_QUAD, { plain = true })[1]
-        local offset = filename:len() + EM_QUAD_LEN
-        local text = line:sub(offset + 1)
-        for _, hl in ipairs(highlight.get_heuristic_ts_highlights(item, text)) do
-          local start_col, end_col, hl_group = hl[1], hl[2], hl[3]
-          start_col = start_col + offset
-          end_col = end_col + offset
-          vim.api.nvim_buf_set_extmark(qfbufnr, ns, i - 1, start_col, {
-            hl_group = hl_group,
-            end_col = end_col,
-            priority = 100,
-            strict = false,
+
+        -- Note: we must include the new line character, when multiple lines are treated as one
+        -- range, without "\n" causes all the problems, for example:
+        --
+        -- tests/tmp/expand_1.lua ┃ 2┃-- a comment
+        -- tests/tmp/expand_1.lua ┃ 3┃local a = 1
+        --
+        -- The parser will treat this as "-- a commentlocal a = 1".
+        local region = {
+          i - 1,
+          filename:len() + EM_QUAD_LEN - 1, -- skip EM_QUAD but include a space
+          i,
+          0,
+        }
+        info.previous_item = info.previous_item or item
+        if info.previous_item.bufnr == item.bufnr and info.previous_item.lnum == item.lnum - 1 then
+          -- Merge current range with previous one, parse them together.
+          table.insert(info.regions[ft][#info.regions[ft]], region)
+        else
+          table.insert(info.regions[ft], {
+            region,
           })
         end
+        info.previous_item = item
+      end
+      if loaded then
+        add_item_highlights_from_buf(qfbufnr, item, line, i)
       end
     end
 
@@ -382,6 +388,12 @@ add_qf_highlights = function(info)
       schedule_highlights(info)
       return
     end
+  end
+  if config.highlight.treesitter then
+    local register_cbs = info.region_count <= config.highlight.max_lines
+    -- cleanup previous regions each time we call setqflist.
+    require("quicker.treesitter").attach(qf_list.qfbufnr, info.empty_regions, register_cbs)
+    require("quicker.treesitter").attach(qf_list.qfbufnr, info.regions, register_cbs)
   end
 
   vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, ns, info.end_idx, -1)
@@ -425,6 +437,11 @@ end
 ---@field id integer
 ---@field start_idx integer
 ---@field end_idx integer
+---@field regions table<string, Range4[][]>
+---@field region_count integer
+---@field empty_regions table<string, Range4[][]>
+---@field ft table<integer, string|nil>
+---@field previous_item QuickFixItem
 ---@field winid integer
 ---@field quickfix 1|0
 ---@field force_bufload? boolean field injected by us to control if we're forcing a bufload for the syntax highlighting
@@ -565,6 +582,10 @@ function M.quickfixtextfunc(info)
             virt_text_pos = "inline",
             invalidate = true,
           })
+        vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, ns, lnum - 1, end_col, {
+          end_col = end_col + EM_QUAD_LEN - 1,
+          conceal = "",
+        })
         idmap[id] = lnum
 
         -- Highlight the filename
@@ -601,6 +622,10 @@ function M.quickfixtextfunc(info)
           virt_lines = { header },
           virt_lines_above = true,
         })
+        -- vim.api.nvim_buf_set_extmark(qf_list.qfbufnr, ns, lnum - 1, end_col, {
+        --   end_col = end_col + EM_QUAD_LEN - 1,
+        --   conceal = "",
+        -- })
       end
     end
   end
@@ -608,6 +633,10 @@ function M.quickfixtextfunc(info)
 
   -- If we just rendered the last item, add highlights
   if info.end_idx == #items then
+    info.regions = {}
+    info.region_count = 0
+    info.empty_regions = {}
+    info.ft = {}
     schedule_highlights(info)
 
     if qf_list.qfbufnr > 0 then
