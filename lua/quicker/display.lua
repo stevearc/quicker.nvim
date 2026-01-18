@@ -71,6 +71,17 @@ M.get_filename_from_item = function(item)
 end
 
 local _col_width_cache = {}
+
+---Clear the cached column width for a specific quickfix list or all lists
+---@param id? integer If provided, clear cache for this specific ID; otherwise clear all caches
+M.clear_col_width_cache = function(id)
+  if id then
+    _col_width_cache[id] = nil
+  else
+    _col_width_cache = {}
+  end
+end
+
 ---@param id integer
 ---@param items QuickFixItem[]
 ---@return integer

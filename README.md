@@ -312,6 +312,7 @@ Update the quickfix list with the current buffer text for each item.
 | loclist_win       | `nil\|integer`             |                                                                                                                      |
 | opts              | `nil\|quicker.RefreshOpts` |                                                                                                                      |
 | >keep_diagnostics | `nil\|boolean`             | If a line has a diagnostic type, keep the original text and display it as virtual text after refreshing from source. |
+| >invalidate_cache | `nil\|boolean`             | Clear the column width cache so that filename widths are recalculated. Useful when max_filename_width changes dynamically. |
 
 ### is_open(loclist_win)
 

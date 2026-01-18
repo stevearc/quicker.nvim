@@ -262,11 +262,16 @@ end
 
 ---@class (exact) quicker.RefreshOpts
 ---@field keep_diagnostics? boolean If a line has a diagnostic type, keep the original text and display it as virtual text after refreshing from source.
+---@field invalidate_cache? boolean Clear the column width cache so that filename widths are recalculated.
 
 ---@param loclist_win? integer
 ---@param opts? quicker.RefreshOpts
 function M.refresh(loclist_win, opts)
   opts = vim.tbl_extend("keep", opts or {}, { keep_diagnostics = true })
+  if opts.invalidate_cache then
+    local display = require("quicker.display")
+    display.clear_col_width_cache()
+  end
   if not loclist_win then
     local ok, qf = pcall(vim.fn.getloclist, 0, { filewinid = 0 })
     if ok and qf.filewinid and qf.filewinid ~= 0 then
