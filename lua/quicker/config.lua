@@ -107,6 +107,7 @@ local has_setup = false
 M.setup = function(opts)
   opts = opts or {}
   local new_conf = vim.tbl_deep_extend("keep", opts, default_config)
+  ---@cast new_conf quicker.Config
 
   for k, v in pairs(new_conf) do
     M[k] = v

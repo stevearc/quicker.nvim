@@ -132,7 +132,6 @@ end
 ---Toggle the quickfix or loclist window.
 ---@param opts? quicker.OpenOpts
 M.toggle = function(opts)
-  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods, view: quicker.WinViewDict}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
     focus = false,
@@ -141,6 +140,7 @@ M.toggle = function(opts)
     open_cmd_mods = {},
     view = {},
   })
+  ---@cast opts {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods, view: quicker.WinViewDict}
   local loclist_win = opts.loclist and 0 or nil
   if M.is_open(loclist_win) then
     M.close({ loclist = opts.loclist })
@@ -153,7 +153,6 @@ end
 ---@param opts? quicker.OpenOpts
 M.open = function(opts)
   local util = require("quicker.util")
-  ---@type {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods, view: quicker.WinViewDict}
   opts = vim.tbl_deep_extend("keep", opts or {}, {
     loclist = false,
     focus = false,
@@ -162,6 +161,7 @@ M.open = function(opts)
     open_cmd_mods = {},
     view = {},
   })
+  ---@cast opts {loclist: boolean, focus: boolean, height?: integer, min_height: integer, max_height: integer, open_cmd_mods: quicker.OpenCmdMods, view: quicker.WinViewDict}
   local clamp = function(val)
     return util.clamp(opts.min_height, val, opts.max_height)
   end
