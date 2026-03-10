@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/stevearc/quicker.nvim/compare/v1.5.0...v1.5.1) (2026-03-10)
+
+
+### Bug Fixes
+
+* recalculate filename widths when max width option changes ([#67](https://github.com/stevearc/quicker.nvim/issues/67)) ([063cc44](https://github.com/stevearc/quicker.nvim/commit/063cc44da1eef8681bbd653b29d3bc961780886a))
+
 ## [1.5.0](https://github.com/stevearc/quicker.nvim/compare/v1.4.0...v1.5.0) (2025-12-23)
 
 
