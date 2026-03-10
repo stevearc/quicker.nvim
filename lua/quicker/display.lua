@@ -71,10 +71,18 @@ M.get_filename_from_item = function(item)
 end
 
 local _col_width_cache = {}
+local _last_max_width = nil
+
 ---@param id integer
 ---@param items QuickFixItem[]
 ---@return integer
 local function get_cached_qf_col_width(id, items)
+  local current_max_width = config.max_filename_width()
+  if _last_max_width ~= current_max_width then
+    _col_width_cache = {}
+    _last_max_width = current_max_width
+  end
+
   local cached = _col_width_cache[id]
   if not cached or cached[2] ~= #items then
     local max_len = 0
