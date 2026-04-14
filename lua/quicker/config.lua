@@ -67,6 +67,8 @@ local default_config = {
   header_length = function(type, start_col)
     return vim.o.columns - start_col
   end,
+
+  relative_path = "cwd",
 }
 
 ---@alias quicker.TrimEnum "all"|"common"|false
@@ -85,6 +87,7 @@ local default_config = {
 ---@field trim_leading_whitespace quicker.TrimEnum
 ---@field max_filename_width fun(): integer
 ---@field header_length fun(type: "hard"|"soft", start_col: integer): integer
+---@field relative_path string | 'git' | 'cwd' | fun(): string
 local M = {}
 
 ---@class (exact) quicker.SetupOptions
@@ -101,6 +104,7 @@ local M = {}
 ---@field trim_leading_whitespace? quicker.TrimEnum How to trim the leading whitespace from results
 ---@field max_filename_width? fun(): integer Maximum width of the filename column
 ---@field header_length? fun(type: "hard"|"soft", start_col: integer): integer How far the header should extend to the right
+---@field relative_path? string | 'git' | 'cwd' | fun(): string Relative path for filenames in list
 
 local has_setup = false
 ---@param opts? quicker.SetupOptions
