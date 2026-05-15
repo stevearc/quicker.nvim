@@ -381,6 +381,18 @@ add_qf_highlights = function(info)
         }
       end
       vim.api.nvim_buf_set_extmark(qfbufnr, ns, i - 1, 0, mark)
+      vim.api.nvim_buf_set_extmark(
+        qfbufnr,
+        ns,
+        i - 1,
+        line:find(EM_QUAD, 1, true) + EM_QUAD_LEN - 1,
+        {
+          hl_group = virt_text_highlight_map[item.type:upper()],
+          end_col = line:len(),
+          priority = 100,
+          invalidate = true,
+        }
+      )
     end
 
     -- If we've been processing for too long, defer to preserve editor responsiveness
