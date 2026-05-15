@@ -57,7 +57,8 @@ M.get_filename_from_item = function(item)
     return item.module
   elseif item.bufnr > 0 then
     local bufname = vim.api.nvim_buf_get_name(item.bufnr)
-    local path = fs.shorten_path(bufname)
+    local relative_to = fs.get_relative(config.relative_path)
+    local path = fs.shorten_path(bufname, relative_to)
     local max_len = config.max_filename_width()
     if max_len == 0 then
       return ""
