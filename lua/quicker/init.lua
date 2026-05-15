@@ -75,7 +75,7 @@ local function setup(opts)
     for _, winid in ipairs(vim.api.nvim_list_wins()) do
       if vim.api.nvim_win_is_valid(winid) then
         local llist = vim.fn.getloclist(winid, { all = 0 })
-        if not vim.tbl_isempty(list.items) then
+        if not vim.tbl_isempty(llist.items) then
           vim.fn.setloclist(winid, {}, "r", llist)
         end
       end
