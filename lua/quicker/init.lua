@@ -117,7 +117,7 @@ M.is_open = function(loclist_win)
   return require("quicker.util").is_open(loclist_win)
 end
 
----@class quicker.OpenCmdMods: vim.api.keyset.parse_cmd.mods
+---@class quicker.OpenCmdMods: vim.api.keyset.cmd.mods
 ---@alias quicker.WinViewDict vim.fn.winrestview.dict
 
 ---@class (exact) quicker.OpenOpts
