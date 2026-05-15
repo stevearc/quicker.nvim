@@ -12,9 +12,9 @@ on:
 jobs:
   luacheck:
     name: Luacheck
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Prepare
         run: |
@@ -28,23 +28,23 @@ jobs:
 
   typecheck:
     name: typecheck
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: stevearc/nvim-typecheck-action@v2
         with:
           path: lua
 
   stylua:
     name: StyLua
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - name: Stylua
-        uses: JohnnyMorganz/stylua-action@v4
+        uses: JohnnyMorganz/stylua-action@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          version: v2.3.1
+          version: v2.4.1
           args: --check lua tests
 
   run_tests:
@@ -53,13 +53,14 @@ jobs:
         include:
           - nvim_tag: v0.10.4
           - nvim_tag: v0.11.5
+          - nvim_tag: v0.12.2
 
     name: Run tests
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     env:
       NVIM_TAG: ${{ matrix.nvim_tag }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Neovim and dependencies
         run: |
@@ -71,9 +72,9 @@ jobs:
 
   update_docs:
     name: Update docs
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
 
       - name: Install Neovim and dependencies
         run: |
@@ -108,13 +109,13 @@ jobs:
       - typecheck
       - run_tests
       - update_docs
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     steps:
-      - uses: googleapis/release-please-action@v4
+      - uses: googleapis/release-please-action@v5
         id: release
         with:
           release-type: simple
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v6
       - uses: rickstaa/action-create-tag@v1
         if: ${{ steps.release.outputs.release_created }}
         with:
