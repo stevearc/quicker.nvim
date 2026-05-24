@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.1](https://github.com/stevearc/quicker.nvim/compare/v1.5.0...v1.5.1) (2026-05-24)
+
+
+### Bug Fixes
+
+* recalculate filename widths when max width option changes ([#67](https://github.com/stevearc/quicker.nvim/issues/67)) ([063cc44](https://github.com/stevearc/quicker.nvim/commit/063cc44da1eef8681bbd653b29d3bc961780886a))
+* typo in loclist update for lazy loading ([#70](https://github.com/stevearc/quicker.nvim/issues/70)) ([1c9322b](https://github.com/stevearc/quicker.nvim/commit/1c9322b7e2967472548ba9bccd1ccd40e49d0a49))
+
 ## [1.5.0](https://github.com/stevearc/quicker.nvim/compare/v1.4.0...v1.5.0) (2025-12-23)
 
 
