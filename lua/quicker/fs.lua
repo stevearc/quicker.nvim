@@ -35,13 +35,34 @@ end
 
 local home_dir = assert(vim.uv.os_homedir())
 
+local function get_git_root()
+  local path = vim.fn.getcwd()
+  while path ~= home_dir do
+    if vim.uv.fs_stat(path .. "/.git") then
+      return path
+    end
+    path = vim.fn.fnamemodify(path, ":h")
+  end
+  return nil
+end
+
+---@param path function|string
+M.get_relative = function(path)
+  if not path or path == "cwd" then
+    return vim.fn.getcwd()
+  elseif type(path) == "function" then
+    return path()
+  elseif path == "git" then
+    return get_git_root()
+  else
+    return M.abspath(path)
+  end
+end
+
 ---@param path string
 ---@param relative_to? string Shorten relative to this path (default cwd)
 ---@return string
 M.shorten_path = function(path, relative_to)
-  if not relative_to then
-    relative_to = vim.fn.getcwd()
-  end
   local relpath
   if M.is_subpath(relative_to, path) then
     local idx = relative_to:len() + 1

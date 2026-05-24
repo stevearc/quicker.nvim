@@ -239,6 +239,8 @@ require("quicker").setup({
   header_length = function(type, start_col)
     return vim.o.columns - start_col
   end,
+  -- Relative path for filenames in list. Can be 'git', 'cwd', a string or a function returning a string
+  relative_path = cwd
 })
 ```
 
