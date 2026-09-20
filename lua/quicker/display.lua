@@ -407,10 +407,22 @@ end
 local function get_lnum_width(items)
   local max_len = 2
   local max = 99
-  for _, item in ipairs(items) do
-    if item.lnum > max then
-      max_len = tostring(item.lnum):len()
-      max = item.lnum
+  if config.show_column then
+    for _, item in ipairs(items) do
+      if item.lnum > 0 then
+        local lnum = tostring(item.lnum)
+        if item.col and item.col > 0 then
+          lnum = string.format("%s:%d", lnum, item.col)
+        end
+        max_len = math.max(max_len, lnum:len())
+      end
+    end
+  else
+    for _, item in ipairs(items) do
+      if item.lnum > max then
+        max_len = tostring(item.lnum):len()
+        max = item.lnum
+      end
     end
   end
   return max_len
@@ -519,6 +531,9 @@ function M.quickfixtextfunc(info)
     if item.valid == 1 then
       -- Matching line
       local lnum = item.lnum == 0 and " " or item.lnum
+      if config.show_column and item.col and item.col > 0 then
+        lnum = string.format("%d:%d", item.lnum, item.col)
+      end
       local filename = rpad(M.get_filename_from_item(item), col_width)
       table.insert(locations, get_virt_text(lnum))
       table.insert(ret, filename .. EM_QUAD .. trimmed_text)
@@ -530,6 +545,9 @@ function M.quickfixtextfunc(info)
     else
       -- Other non-matching line
       local lnum = item.lnum == 0 and " " or item.lnum
+      if config.show_column and item.col and item.col > 0 then
+        lnum = string.format("%d:%d", item.lnum, item.col)
+      end
       local filename = rpad(M.get_filename_from_item(item), col_width)
       table.insert(locations, get_virt_text(lnum))
       invalid_filenames[#locations] = true

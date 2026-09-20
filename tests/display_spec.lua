@@ -49,6 +49,36 @@ a.describe("display", function()
     test_util.assert_snapshot(0, "display_1")
   end)
 
+  it("renders quickfix items with columns", function()
+    config.show_column = true
+    local bufnr = vim.fn.bufadd("README.md")
+    vim.fn.setqflist({
+      {
+        bufnr = bufnr,
+        text = "short column",
+        lnum = 7,
+        col = 1,
+        valid = 1,
+      },
+      {
+        bufnr = bufnr,
+        text = "wide location",
+        lnum = 120,
+        col = 45,
+        valid = 1,
+      },
+      {
+        bufnr = bufnr,
+        text = "missing column",
+        lnum = 10,
+        col = 0,
+        valid = 1,
+      },
+    })
+    vim.cmd.copen()
+    test_util.assert_snapshot(0, "display_columns_1")
+  end)
+
   a.it("truncates long filenames", function()
     config.max_filename_width = function()
       return 10

@@ -37,6 +37,8 @@ OPTIONS                                                          *quicker-option
       },
       -- Keep the cursor to the right of the filename and lnum columns
       constrain_cursor = true,
+      -- Display quickfix item column numbers after line numbers
+      show_column = false,
       highlight = {
         -- Use treesitter highlighting
         treesitter = true,

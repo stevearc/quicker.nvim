@@ -25,6 +25,8 @@ local default_config = {
   },
   -- Keep the cursor to the right of the filename and lnum columns
   constrain_cursor = true,
+  -- Display quickfix item column numbers after line numbers
+  show_column = false,
   highlight = {
     -- Use treesitter highlighting
     treesitter = true,
@@ -77,6 +79,7 @@ local default_config = {
 ---@field keys quicker.Keymap[]
 ---@field use_default_opts boolean
 ---@field constrain_cursor boolean
+---@field show_column boolean
 ---@field highlight quicker.HighlightConfig
 ---@field follow quicker.FollowConfig
 ---@field edit quicker.EditConfig
@@ -93,6 +96,7 @@ local M = {}
 ---@field keys? quicker.Keymap[] Keymaps to set for the quickfix buffer
 ---@field use_default_opts? boolean Set to false to disable the default options in `opts`
 ---@field constrain_cursor? boolean Keep the cursor to the right of the filename and lnum columns
+---@field show_column? boolean Display quickfix item column numbers after line numbers
 ---@field highlight? quicker.SetupHighlightConfig Configure syntax highlighting
 ---@field follow? quicker.SetupFollowConfig Configure cursor following
 ---@field edit? quicker.SetupEditConfig
