@@ -554,6 +554,16 @@ function M.quickfixtextfunc(info)
         return
       end
 
+      -- The list can change between rendering and this call (for example emptied right after
+      -- :copen). Then the buffer no longer shows these lines, and a newer render schedules its own
+      -- call, so leave the buffer alone.
+      local lines = vim.api.nvim_buf_get_lines(qf_list.qfbufnr, start_idx - 1, -1, false)
+      for i = 1, #locations do
+        if lines[i] ~= ret[i] then
+          return
+        end
+      end
+
       local ns = vim.api.nvim_create_namespace("quicker_locations")
       vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, ns, start_idx - 1, -1)
       local header_ns = vim.api.nvim_create_namespace("quicker_headers")
@@ -562,7 +572,6 @@ function M.quickfixtextfunc(info)
       vim.api.nvim_buf_clear_namespace(qf_list.qfbufnr, filename_ns, start_idx - 1, -1)
 
       local idmap = {}
-      local lines = vim.api.nvim_buf_get_lines(qf_list.qfbufnr, start_idx - 1, -1, false)
       for i, loc in ipairs(locations) do
         local end_col = lines[i]:find(EM_QUAD, 1, true) or col_width
         local lnum = start_idx + i - 1
