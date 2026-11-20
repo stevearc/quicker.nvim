@@ -80,6 +80,24 @@ a.describe("display", function()
     test_util.assert_snapshot(0, "display_minimal_1")
   end)
 
+  a.it("leaves a list alone that changed before its virtual text was added", function()
+    local bufnr = vim.fn.bufadd(test_util.make_tmp_file("changed.txt", 10))
+    vim.v.errmsg = ""
+    vim.fn.setqflist({
+      {
+        bufnr = bufnr,
+        text = "text",
+        lnum = 1,
+        valid = 1,
+      },
+    })
+    vim.cmd.copen()
+    -- Emptied before the scheduled virtual text runs
+    vim.fn.setqflist({})
+    sleep(50)
+    assert.equals("", vim.v.errmsg)
+  end)
+
   a.it("sets signs for diagnostics", function()
     local bufnr = vim.fn.bufadd(test_util.make_tmp_file("sign_test.txt", 10))
     vim.fn.setqflist({
